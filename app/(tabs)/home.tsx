@@ -3,6 +3,8 @@ import { ScrollView, StyleSheet } from 'react-native';
 import { ActivityCard } from '@/components/ActivityCard/ActivityCard';
 import { ACTIVITY_TYPES_ENUM } from '@/constants/activity-types';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useHeaderHeight } from '@react-navigation/elements';
+import { ScrollableScreenWrapper } from '@/components/ScrollableScreenWrapper/ScrollableScreenWrapper';
 
 const MOCK_USER = {
   name: 'Leonard Posa',
@@ -39,9 +41,14 @@ const MOCK_ACTIVITY_2 = {
 };
 
 export default function HomeScreen() {
+  const headerHeight = useHeaderHeight();
+
   return (
     <LinearGradient colors={['#82D0EE', '#3AAAD9']} start={[0, 0]} end={[1, 0]} style={{ flex: 1 }}>
-      <ScrollView style={styles.scrollViewContent}>
+      <ScrollView
+        style={styles.scrollViewContent}
+        contentContainerStyle={{ paddingTop: headerHeight - 40 }}
+      >
         <ActivityCard {...MOCK_ACTIVITY} />
         <ActivityCard {...MOCK_ACTIVITY_2} />
       </ScrollView>

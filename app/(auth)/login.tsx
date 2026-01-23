@@ -1,14 +1,17 @@
-import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Pressable, StyleSheet, Alert } from 'react-native';
 import { useState } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { supabase } from '@/services/Supabase';
+import { HangOutLogo } from '@/svg/logo';
+import { useInputValidation } from '@/hooks/useInputValidation';
 
 export default function LoginScreen() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const { email, password, handleEmailChange, handlePasswordChange, inputErrors, validateFields } =
+    useInputValidation();
 
   const signInWithEmail = async () => {
     setLoading(true);
@@ -16,9 +19,18 @@ export default function LoginScreen() {
 
     if (error) {
       setError(error.message);
+      Alert.alert(`Something went wrong - ${error.message}`);
     }
+
     setLoading(false);
     router.replace('/(tabs)/home');
+  };
+
+  const handleSubmit = async () => {
+    const isValid = validateFields();
+    if (!isValid) return;
+
+    await signInWithEmail();
   };
 
   return (
@@ -29,32 +41,40 @@ export default function LoginScreen() {
       style={styles.container}
     >
       <View style={styles.content}>
+        <HangOutLogo style={styles.logo} height={100} />
         <Text style={styles.title}>Welcome Back</Text>
         <Text style={styles.subtitle}>Sign in to continue</Text>
 
         <View style={styles.form}>
           <TextInput
-            style={styles.input}
+            style={[styles.input, inputErrors.email && { borderColor: 'red', borderWidth: 1 }]}
             placeholder="Email"
             placeholderTextColor="#999"
             value={email}
-            onChangeText={setEmail}
+            onChangeText={handleEmailChange}
+            onBlur={validateFields}
             keyboardType="email-address"
             autoCapitalize="none"
           />
+
+          {inputErrors.email && <Text style={styles.errorText}>{inputErrors.email}</Text>}
+
           <TextInput
-            style={styles.input}
+            style={[styles.input, inputErrors.password && { borderColor: 'red', borderWidth: 1 }]}
             placeholder="Password"
             placeholderTextColor="#999"
             value={password}
-            onChangeText={setPassword}
+            onChangeText={handlePasswordChange}
+            onBlur={validateFields}
             secureTextEntry
           />
 
+          {inputErrors.password && <Text style={styles.errorText}>{inputErrors.password}</Text>}
+
           <Pressable
-            style={styles.loginButton}
-            onPress={signInWithEmail}
-            disabled={loading || !email || !password}
+            style={[styles.loginButton, !!inputErrors && { opacity: 0.5 }]}
+            onPress={handleSubmit}
+            disabled={loading || !!inputErrors}
           >
             <LinearGradient
               colors={['#FFC371', '#FF5F6D', '#D92550']}
@@ -134,5 +154,18 @@ const styles = StyleSheet.create({
   },
   linkBold: {
     fontWeight: 'bold',
+  },
+  logo: {
+    marginBottom: 50,
+    marginHorizontal: 'auto',
+  },
+  errorText: {
+    color: '#FFECEC',
+    backgroundColor: 'rgba(255, 0, 0, 0.5)',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    marginBottom: 8,
+    fontSize: 13,
   },
 });

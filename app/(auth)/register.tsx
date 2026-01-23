@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { supabase } from '@/services/Supabase';
+import { HangOutLogo } from '@/svg/logo';
 
 type Errors = {
   email?: string;
@@ -83,6 +84,8 @@ export default function RegisterScreen() {
       style={styles.container}
     >
       <View style={styles.content}>
+        <HangOutLogo style={styles.logo} height={100} />
+
         <Text style={styles.title}>Create Account</Text>
         <Text style={styles.subtitle}>Sign up to get started</Text>
 
@@ -220,4 +223,8 @@ const styles = StyleSheet.create({
     opacity: 0.9,
   },
   linkBold: { fontWeight: 'bold' },
+  logo: {
+    marginBottom: 50,
+    marginHorizontal: 'auto',
+  },
 });

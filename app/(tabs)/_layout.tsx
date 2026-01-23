@@ -1,9 +1,10 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { StyleSheet, useWindowDimensions, View, Text } from 'react-native';
+import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
 import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { Header } from '@/components/Navigation/Header';
 
 const TAB_WIDTH = 200;
 
@@ -15,11 +16,22 @@ export default function TabLayout() {
       screenOptions={{
         tabBarActiveTintColor: '#FFFFFF',
         tabBarInactiveTintColor: '#9CA3AF',
-        headerShown: false,
+        header: () => <Header />,
+        headerTransparent: true,
+
         tabBarButton: HapticTab,
         tabBarShowLabel: false,
         tabBarHideOnKeyboard: true,
-
+        tabBarItemStyle: {
+          paddingVertical: 0,
+          height: 64,
+          margin: 0,
+        },
+        tabBarIconStyle: {
+          width: '100%',
+          height: '100%',
+          marginTop: 0,
+        },
         tabBarStyle: [
           styles.tabBar,
           {

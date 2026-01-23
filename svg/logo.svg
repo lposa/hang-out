@@ -1,0 +1,51 @@
+<svg
+        width="400"
+        height="120"
+        viewBox="0 0 400 120"
+        xmlns="http://www.w3.org/2000/svg"
+>
+    <defs>
+        <!-- Gradient for the text -->
+        <linearGradient id="hangoutGradient" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#FFC371" />
+            <stop offset="50%" stop-color="#FF5F6D" />
+            <stop offset="100%" stop-color="#D92550" />
+        </linearGradient>
+
+        <!-- Optional soft glow behind text -->
+        <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="4" result="coloredBlur" />
+            <feMerge>
+                <feMergeNode in="coloredBlur" />
+                <feMergeNode in="SourceGraphic" />
+            </feMerge>
+        </filter>
+    </defs>
+
+    <!-- Optional subtle background shape (can remove if you want transparent) -->
+    <!--
+    <rect
+      x="0"
+      y="0"
+      width="400"
+      height="120"
+      rx="24"
+      fill="#ffffff"
+      opacity="0.0"
+    />
+    -->
+
+    <!-- Wordmark -->
+    <text
+            x="50%"
+            y="50%"
+            dominant-baseline="middle"
+            text-anchor="middle"
+            font-size="52"
+            font-family="Pacifico, 'Dancing Script', 'Segoe Script', cursive"
+            fill="url(#hangoutGradient)"
+            filter="url(#softGlow)"
+    >
+        HangOut
+    </text>
+</svg>
