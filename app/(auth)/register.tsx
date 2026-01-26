@@ -1,62 +1,53 @@
-import { View, Text, TextInput, Pressable, StyleSheet, Alert } from 'react-native';
-import { useState } from 'react';
-import { LinearGradient } from 'expo-linear-gradient';
-import { router } from 'expo-router';
+import { FormInput } from '@/components/elements';
+import { LoaderSpinner } from '@/components/elements/LoaderSpinner';
+import { INPUT_VALIDATION_RULES } from '@/constants';
 import { supabase } from '@/services/Supabase';
 import { HangOutLogo } from '@/svg/logo';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
+import { useState } from 'react';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 
-type Errors = {
-  email?: string;
-  password?: string;
-  confirmPassword?: string;
+type RegisterFormData = {
+  email: string;
+  password: string;
+  confirmPassword: string;
 };
 
 export default function RegisterScreen() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [inputErrors, setInputErrors] = useState<Errors>({});
   const [serverError, setServerError] = useState('');
 
-  const validateFields = () => {
-    const newErrors: Errors = {};
+  const {
+    control,
+    handleSubmit,
+    watch,
+    formState: { errors, isValid },
+  } = useForm<RegisterFormData>({
+    mode: 'onChange',
+    defaultValues: {
+      email: '',
+      password: '',
+      confirmPassword: '',
+    },
+  });
 
-    if (!email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = 'Enter a valid email';
-    }
+  const watchedPassword = watch('password');
 
-    if (!password) {
-      newErrors.password = 'Password is required';
-    } else if (password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
-    }
-
-    if (!confirmPassword) {
-      newErrors.confirmPassword = 'Confirm password is required';
-    } else if (password !== confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
-    }
-
-    setInputErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  async function signUpWithEmail() {
+  const onSubmit: SubmitHandler<RegisterFormData> = async (formData) => {
     setLoading(true);
-    setServerError('');
+    const { email, password } = formData;
 
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
     });
 
+    //TODO: Check if user exists on server side
+
     if (error) {
-      setServerError(error.message);
-      setLoading(false);
-      return;
+      Alert.alert(`Something went wrong - ${error.message}`);
     }
 
     if (!data.session) {
@@ -67,22 +58,10 @@ export default function RegisterScreen() {
     }
 
     setLoading(false);
-  }
-
-  const handleOnSubmit = async () => {
-    const isValid = validateFields();
-    if (!isValid) return;
-
-    await signUpWithEmail();
   };
 
   return (
-    <LinearGradient
-      colors={['#82D0EE', '#3AAAD9']}
-      start={[0, 0]}
-      end={[1, 0]}
-      style={styles.container}
-    >
+    <View style={styles.container}>
       <View style={styles.content}>
         <HangOutLogo style={styles.logo} height={100} />
 
@@ -90,54 +69,44 @@ export default function RegisterScreen() {
         <Text style={styles.subtitle}>Sign up to get started</Text>
 
         <View style={styles.form}>
-          <TextInput
-            style={styles.input}
+          <FormInput
+            control={control}
+            name="email"
             placeholder="Email"
-            placeholderTextColor="#999"
-            value={email}
-            onChangeText={(text) => {
-              setEmail(text);
-              if (inputErrors.email) setInputErrors((prev) => ({ ...prev, email: undefined }));
-            }}
-            keyboardType="email-address"
-            autoCapitalize="none"
+            rules={INPUT_VALIDATION_RULES.email}
+            customStyle={errors.email && { borderColor: 'red', borderWidth: 1 }}
           />
-          {inputErrors.email && <Text style={styles.errorText}>{inputErrors.email}</Text>}
 
-          <TextInput
-            style={styles.input}
+          {errors.email && <Text style={styles.errorText}>{errors.email.message}</Text>}
+
+          <FormInput
+            control={control}
+            name="password"
             placeholder="Password"
-            placeholderTextColor="#999"
-            value={password}
-            onChangeText={(text) => {
-              setPassword(text);
-              if (inputErrors.password)
-                setInputErrors((prev) => ({ ...prev, password: undefined }));
-            }}
             secureTextEntry
+            rules={INPUT_VALIDATION_RULES.password}
+            customStyle={errors.password && { borderColor: 'red', borderWidth: 1 }}
           />
-          {inputErrors.password && <Text style={styles.errorText}>{inputErrors.password}</Text>}
 
-          <TextInput
-            style={styles.input}
+          {errors.password && <Text style={styles.errorText}>{errors.password.message}</Text>}
+
+          <FormInput
+            control={control}
+            name="confirmPassword"
             placeholder="Confirm Password"
-            placeholderTextColor="#999"
-            value={confirmPassword}
-            onChangeText={(text) => {
-              setConfirmPassword(text);
-              if (inputErrors.confirmPassword)
-                setInputErrors((prev) => ({ ...prev, confirmPassword: undefined }));
-            }}
             secureTextEntry
+            rules={INPUT_VALIDATION_RULES.confirmPassword(watchedPassword)}
+            customStyle={errors.password && { borderColor: 'red', borderWidth: 1 }}
           />
-          {inputErrors.confirmPassword && (
-            <Text style={styles.errorText}>{inputErrors.confirmPassword}</Text>
+
+          {errors.confirmPassword && (
+            <Text style={styles.errorText}>{errors.confirmPassword.message}</Text>
           )}
 
           <Pressable
-            style={[styles.registerButton, loading && { opacity: 0.7 }]}
-            onPress={handleOnSubmit}
-            disabled={loading}
+            style={[styles.registerButton, (loading || !isValid) && { opacity: 0.5 }]}
+            onPress={handleSubmit(onSubmit)}
+            disabled={loading || !isValid}
           >
             <LinearGradient
               colors={['#FFC371', '#FF5F6D', '#D92550']}
@@ -145,7 +114,11 @@ export default function RegisterScreen() {
               end={[1, 0.5]}
               style={styles.buttonGradient}
             >
-              <Text style={styles.buttonText}>{loading ? 'Signing Up...' : 'Sign Up'}</Text>
+              {loading ? (
+                <LoaderSpinner size={24} color="#FFFFFF" />
+              ) : (
+                <Text style={styles.buttonText}>Sign Up</Text>
+              )}
             </LinearGradient>
           </Pressable>
 
@@ -158,12 +131,12 @@ export default function RegisterScreen() {
           </Pressable>
         </View>
       </View>
-    </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: { flex: 1, backgroundColor: 'transparent' },
   content: {
     flex: 1,
     justifyContent: 'center',
@@ -184,13 +157,7 @@ const styles = StyleSheet.create({
     opacity: 0.9,
   },
   form: { width: '100%' },
-  input: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-    marginBottom: 8,
-  },
+
   registerButton: {
     borderRadius: 12,
     overflow: 'hidden',
@@ -209,11 +176,11 @@ const styles = StyleSheet.create({
   },
   errorText: {
     color: '#FFECEC',
-    backgroundColor: 'rgba(255, 0, 0, 0.3)',
+    backgroundColor: 'rgba(255, 0, 0, 0.5)',
     paddingVertical: 4,
     paddingHorizontal: 8,
     borderRadius: 8,
-    marginBottom: 8,
+    marginBottom: 16,
     fontSize: 13,
   },
   linkText: {

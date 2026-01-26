@@ -9,6 +9,7 @@ import 'react-native-reanimated';
 import { ScrollProvider } from '@/context/ScrollContext';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { supabase } from '@/services/Supabase';
+import { LinearGradient } from 'expo-linear-gradient';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -64,15 +65,46 @@ export default function RootLayout() {
     }
   }, [isAuthenticated, router, segments]);
 
+  const transparentTheme = {
+    ...(colorScheme === 'dark' ? DarkTheme : DefaultTheme),
+    colors: {
+      ...(colorScheme === 'dark' ? DarkTheme.colors : DefaultTheme.colors),
+      background: 'transparent',
+      card: 'transparent',
+    },
+  };
+
   return (
     <ScrollProvider>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-        </Stack>
-        <StatusBar style="auto" />
+      <ThemeProvider value={transparentTheme}>
+        <LinearGradient
+          colors={['#82D0EE', '#3AAAD9']}
+          start={[0, 0]}
+          end={[1, 0]}
+          style={{ flex: 1 }}
+        >
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: 'transparent' },
+            }}
+            initialRouteName="(auth)"
+          >
+            <Stack.Screen
+              name="(auth)"
+              options={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' } }}
+            />
+            <Stack.Screen
+              name="(tabs)"
+              options={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' } }}
+            />
+            <Stack.Screen
+              name="modal"
+              options={{ presentation: 'modal', title: 'Modal', contentStyle: { backgroundColor: 'transparent' } }}
+            />
+          </Stack>
+          <StatusBar style="auto" />
+        </LinearGradient>
       </ThemeProvider>
     </ScrollProvider>
   );

@@ -1,80 +1,82 @@
-import { View, Text, TextInput, Pressable, StyleSheet, Alert } from 'react-native';
-import { useState } from 'react';
-import { LinearGradient } from 'expo-linear-gradient';
-import { router } from 'expo-router';
+import { FormInput } from '@/components/elements';
+import { LoaderSpinner } from '@/components/elements/LoaderSpinner';
+import { INPUT_VALIDATION_RULES } from '@/constants';
 import { supabase } from '@/services/Supabase';
 import { HangOutLogo } from '@/svg/logo';
-import { useInputValidation } from '@/hooks/useInputValidation';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
+import { useState } from 'react';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+
+type LoginFormData = {
+  email: '';
+  password: '';
+};
 
 export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
-  const { email, password, handleEmailChange, handlePasswordChange, inputErrors, validateFields } =
-    useInputValidation();
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isValid },
+  } = useForm<LoginFormData>({
+    mode: 'onChange',
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
 
-  const signInWithEmail = async () => {
+  const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
     setLoading(true);
+    const { email, password } = data;
+
     const { error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
-      setError(error.message);
       Alert.alert(`Something went wrong - ${error.message}`);
+    } else {
+      router.replace('/(tabs)/home');
     }
 
     setLoading(false);
-    router.replace('/(tabs)/home');
-  };
-
-  const handleSubmit = async () => {
-    const isValid = validateFields();
-    if (!isValid) return;
-
-    await signInWithEmail();
   };
 
   return (
-    <LinearGradient
-      colors={['#82D0EE', '#3AAAD9']}
-      start={[0, 0]}
-      end={[1, 0]}
-      style={styles.container}
-    >
+    <View style={styles.container}>
       <View style={styles.content}>
         <HangOutLogo style={styles.logo} height={100} />
         <Text style={styles.title}>Welcome Back</Text>
         <Text style={styles.subtitle}>Sign in to continue</Text>
 
         <View style={styles.form}>
-          <TextInput
-            style={[styles.input, inputErrors.email && { borderColor: 'red', borderWidth: 1 }]}
+          <FormInput
+            control={control}
+            name="email"
             placeholder="Email"
-            placeholderTextColor="#999"
-            value={email}
-            onChangeText={handleEmailChange}
-            onBlur={validateFields}
-            keyboardType="email-address"
-            autoCapitalize="none"
+            rules={INPUT_VALIDATION_RULES.email}
+            customStyle={errors.email && { borderColor: 'red', borderWidth: 1 }}
           />
 
-          {inputErrors.email && <Text style={styles.errorText}>{inputErrors.email}</Text>}
+          {errors.email && <Text style={styles.errorText}>{errors.email.message}</Text>}
 
-          <TextInput
-            style={[styles.input, inputErrors.password && { borderColor: 'red', borderWidth: 1 }]}
+          <FormInput
+            control={control}
+            name="password"
             placeholder="Password"
-            placeholderTextColor="#999"
-            value={password}
-            onChangeText={handlePasswordChange}
-            onBlur={validateFields}
             secureTextEntry
+            rules={INPUT_VALIDATION_RULES.password}
+            customStyle={errors.password && { borderColor: 'red', borderWidth: 1 }}
           />
 
-          {inputErrors.password && <Text style={styles.errorText}>{inputErrors.password}</Text>}
+          {errors.password && <Text style={styles.errorText}>{errors.password.message}</Text>}
 
           <Pressable
-            style={[styles.loginButton, !!inputErrors && { opacity: 0.5 }]}
-            onPress={handleSubmit}
-            disabled={loading || !!inputErrors}
+            style={[styles.loginButton, (loading || !isValid) && { opacity: 0.5 }]}
+            onPress={handleSubmit(onSubmit)}
+            disabled={loading || !isValid}
           >
             <LinearGradient
               colors={['#FFC371', '#FF5F6D', '#D92550']}
@@ -82,7 +84,11 @@ export default function LoginScreen() {
               end={[1, 0.5]}
               style={styles.buttonGradient}
             >
-              <Text style={styles.buttonText}>Sign In</Text>
+              {loading ? (
+                <LoaderSpinner size={24} color="#FFFFFF" />
+              ) : (
+                <Text style={styles.buttonText}>Sign In</Text>
+              )}
             </LinearGradient>
           </Pressable>
 
@@ -93,19 +99,13 @@ export default function LoginScreen() {
           </Pressable>
         </View>
       </View>
-    </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 24,
-  },
+  container: { flex: 1, backgroundColor: 'transparent' },
+  content: { flex: 1, justifyContent: 'center', paddingHorizontal: 24 },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
@@ -113,59 +113,22 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     textAlign: 'center',
   },
-  subtitle: {
-    fontSize: 16,
-    color: '#FFFFFF',
-    marginBottom: 40,
-    textAlign: 'center',
-    opacity: 0.9,
-  },
-  form: {
-    width: '100%',
-  },
-  input: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-    marginBottom: 16,
-  },
-  loginButton: {
-    borderRadius: 12,
-    overflow: 'hidden',
-    marginTop: 8,
-    marginBottom: 24,
-  },
-  buttonGradient: {
-    padding: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  buttonText: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  linkText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    textAlign: 'center',
-    opacity: 0.9,
-  },
-  linkBold: {
-    fontWeight: 'bold',
-  },
-  logo: {
-    marginBottom: 50,
-    marginHorizontal: 'auto',
-  },
+  subtitle: { fontSize: 16, color: '#FFFFFF', marginBottom: 40, textAlign: 'center', opacity: 0.9 },
+  form: { width: '100%' },
+
+  loginButton: { borderRadius: 12, overflow: 'hidden', marginTop: 8, marginBottom: 24 },
+  buttonGradient: { padding: 16, alignItems: 'center', justifyContent: 'center' },
+  buttonText: { color: '#FFFFFF', fontSize: 18, fontWeight: 'bold' },
+  linkText: { color: '#FFFFFF', fontSize: 14, textAlign: 'center', opacity: 0.9 },
+  linkBold: { fontWeight: 'bold' },
+  logo: { marginBottom: 50, marginHorizontal: 'auto' },
   errorText: {
     color: '#FFECEC',
     backgroundColor: 'rgba(255, 0, 0, 0.5)',
     paddingVertical: 4,
     paddingHorizontal: 8,
     borderRadius: 8,
-    marginBottom: 8,
+    marginBottom: 16,
     fontSize: 13,
   },
 });

@@ -2,10 +2,8 @@ import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
   movieDetailsContainer: {
-    flexDirection: 'row',
     gap: 12,
     marginBottom: 16,
-    width: '100%',
   },
   movieDetailsPoster: {
     width: 150,
@@ -29,5 +27,10 @@ export const styles = StyleSheet.create({
     color: '#666',
     lineHeight: 20,
     flexShrink: 1,
+  },
+
+  movieTitle: {
+    fontSize: 20,
+    textAlign: 'center',
   },
 });

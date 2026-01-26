@@ -1,12 +1,16 @@
-import { View, Text, ScrollView } from 'react-native';
 import { useHeaderHeight } from '@react-navigation/elements';
+import { ScrollView, Text } from 'react-native';
+import { ProfileForm } from '@/components/ProfileForm/ProfileForm';
 
 export default function ProfileScreen() {
-  const headerHeight = useHeaderHeight(); // Get the exact height of the header
+  const headerHeight = useHeaderHeight();
 
   return (
-    <ScrollView contentContainerStyle={{ paddingTop: headerHeight }}>
-      <Text>Profile</Text>
+    <ScrollView
+      style={{ backgroundColor: 'transparent' }}
+      contentContainerStyle={{ paddingTop: headerHeight }}
+    >
+      <ProfileForm />
     </ScrollView>
   );
 }

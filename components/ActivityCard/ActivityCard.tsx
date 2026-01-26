@@ -4,8 +4,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { ACTIVITY_TYPES_ENUM } from '@/constants/activity-types';
 import { ActivityPosterDetails } from '@/components/ActivityPosterDetails/ActivityPosterDetails';
-import { AnimatedCircularProgress } from 'react-native-circular-progress';
 import { MovieDetails } from '@/components/MovieDetails/MovieDetails';
+import { useMovieDb } from '@/hooks/useMovieDb';
 
 export type ActivityPoster = {
   name: string;
@@ -36,6 +36,8 @@ export const ActivityCard = ({
   activityType,
   details,
 }: IActivityCardProps) => {
+  const { movie } = useMovieDb({ movieName: activityName });
+
   return (
     <View style={styles.activityContainer}>
       <View style={styles.profilePicContainer}>
@@ -56,7 +58,7 @@ export const ActivityCard = ({
         </View>
 
         <View style={styles.contentSection}>
-          <MovieDetails movieName={activityName} />
+          <MovieDetails movie={movie} />
           <View style={styles.detailsContainer}>
             <View style={styles.detailRow}>
               <Ionicons name="calendar-outline" size={18} color="#666" />
