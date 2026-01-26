@@ -14,5 +14,12 @@ export const styles = StyleSheet.create({
   customMovieDetailsContainer: {
     width: 150,
     height: 300,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+  },
+  selectedSearchResultOutline: {
+    borderColor: 'gold',
+    borderWidth: 2,
+    borderRadius: 10,
   },
 });

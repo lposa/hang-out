@@ -1,4 +1,4 @@
-import { TextInput, View } from 'react-native';
+import { Alert, Pressable, TextInput, View } from 'react-native';
 import { FormInput } from '@/components/elements';
 import { useForm } from 'react-hook-form';
 import { styles } from './ProfileForm.style';
@@ -12,21 +12,25 @@ import { MovieDetails } from '@/components/MovieDetails/MovieDetails';
 type ProfileFormData = {
   firstName: string;
   lastName: string;
-  topTenMovies: string[] | undefined;
+  topTenMovies: MappedMovie[] | undefined;
   topTenBooks: string[] | undefined;
   topTenShows: string[] | undefined;
 };
 
 const DEBOUNCE_MS = 500;
 
+const MAX_MOVIES_SELECTION = 10;
+
 export const ProfileForm = () => {
   const [movies, setMovies] = useState<string>('');
   const [movieResults, setMovieResults] = useState<MappedMovie[]>([]);
+  const [selectedMovies, setSelectedMovies] = useState<MappedMovie[]>([]);
   const debounceRef = useRef<number | null>(null);
 
   const {
     control,
     handleSubmit,
+    setValue,
     formState: { errors, isValid },
   } = useForm<ProfileFormData>({
     mode: 'onChange',
@@ -46,6 +50,10 @@ export const ProfileForm = () => {
       }
     };
   }, []);
+
+  useEffect(() => {
+    setValue('topTenMovies', selectedMovies);
+  }, [selectedMovies, setValue]);
 
   const handleMovieSearch = (movieName: string) => {
     setMovies(movieName);
@@ -72,6 +80,23 @@ export const ProfileForm = () => {
     }, DEBOUNCE_MS);
   };
 
+  const handleMovieSelection = (movie: MappedMovie) => {
+    const isAlreadySelected = selectedMovies.some((selected) => selected.id === movie.id);
+
+    if (isAlreadySelected) {
+      setSelectedMovies((prev) => prev.filter((selected) => selected.id !== movie.id));
+    } else {
+      if (selectedMovies.length < MAX_MOVIES_SELECTION) {
+        setSelectedMovies((prev) => [...prev, movie]);
+      } else {
+        Alert.alert(
+          'Selection Limit Reached',
+          `You can select a maximum of ${MAX_MOVIES_SELECTION} movies.`
+        );
+      }
+    }
+  };
+
   return (
     <View style={styles.profileFormContainer}>
       <FormInput control={control} name="firstName" placeholder="First name" />
@@ -89,13 +114,19 @@ export const ProfileForm = () => {
         <HorizontalList
           data={movieResults}
           renderItem={({ item: movie }) => (
-            <MovieDetails
-              movie={movie}
-              isRow={false}
-              shouldShowOverview={false}
-              shouldShowTitle
-              customContainerStyle={styles.customMovieDetailsContainer}
-            />
+            <Pressable onPress={() => handleMovieSelection(movie)}>
+              <MovieDetails
+                movie={movie}
+                isRow={false}
+                shouldShowOverview={false}
+                shouldShowTitle
+                customContainerStyle={[
+                  styles.customMovieDetailsContainer,
+                  selectedMovies.some((selected) => selected.id === movie.id) &&
+                    styles.selectedSearchResultOutline,
+                ]}
+              />
+            </Pressable>
           )}
           keyExtractor={(movie) => movie.id.toString()}
         />
