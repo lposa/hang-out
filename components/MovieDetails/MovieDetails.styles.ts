@@ -30,7 +30,22 @@ export const styles = StyleSheet.create({
   },
 
   movieTitle: {
-    fontSize: 20,
-    textAlign: 'center',
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1F2937',
+    paddingHorizontal: 8,
+    paddingTop: 8,
+    paddingBottom: 4,
+    lineHeight: 18,
+  },
+  movieExtraDetails: {
+    flex: 1,
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    marginVertical: 5,
+  },
+  movieGenreContainer: {
+    gap: 1,
   },
 });

@@ -1,1 +1,1 @@
-export { MappedMovie, Movie, TMDBMovieSearchResponse } from './movies';
+export { MappedMovie, Movie, TMDBMovieSearchResponse, TMDBMovieDetailsResponse } from './movies';

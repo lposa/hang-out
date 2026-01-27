@@ -1,4 +1,4 @@
-import { MappedMovie, Movie } from '@/types';
+import { MappedMovie, Movie, TMDBMovieDetailsResponse } from '@/types';
 
 export const getMoviePoster = (
   moviePosterPath: string | null,
@@ -17,7 +17,20 @@ export const mapMovie = (movie: Movie): MappedMovie => {
     title: movie?.title,
     image: getMoviePoster(movie?.poster_path),
     overview: movie?.overview,
+    releaseDate: movie?.release_date,
   };
 };
 
 export const mapMovieList = (movies: Movie[]): MappedMovie[] => movies.map(mapMovie);
+
+export const mapMovieDetails = (movie: TMDBMovieDetailsResponse): MappedMovie => {
+  return {
+    id: movie?.id,
+    title: movie?.title,
+    image: getMoviePoster(movie?.poster_path),
+    overview: movie?.overview,
+    genre: movie?.genres.map((genre) => genre.name),
+    releaseDate: movie?.release_date,
+    runtime: movie?.runtime,
+  };
+};

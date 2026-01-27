@@ -1,4 +1,5 @@
 import { Alert, Pressable, TextInput, View } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import { FormInput } from '@/components/elements';
 import { useForm } from 'react-hook-form';
 import { styles } from './ProfileForm.style';
@@ -8,6 +9,7 @@ import { mapMovieList } from '@/helpers';
 import { MappedMovie } from '@/types';
 import { HorizontalList } from '@/components/HorizontalList';
 import { MovieDetails } from '@/components/MovieDetails/MovieDetails';
+import { mapMovieDetails } from '@/helpers/movies';
 
 type ProfileFormData = {
   firstName: string;
@@ -74,9 +76,21 @@ export const ProfileForm = () => {
         return;
       }
 
-      const mappedMovies = mapMovieList(movies.results);
+      const detailedMoviesPromises = movies.results.map(async (movie) => {
+        const movieDetail = await movieDB.getMovieById(movie.id);
+        if (movieDetail) {
+          return mapMovieDetails(movieDetail);
+        }
+        return null;
+      });
 
-      setMovieResults(mappedMovies);
+      const allMappedMovies = await Promise.all(detailedMoviesPromises);
+
+      const validMappedMovies = allMappedMovies.filter(
+        (movie): movie is MappedMovie => movie !== null
+      );
+
+      setMovieResults(validMappedMovies);
     }, DEBOUNCE_MS);
   };
 
@@ -113,21 +127,33 @@ export const ProfileForm = () => {
 
         <HorizontalList
           data={movieResults}
-          renderItem={({ item: movie }) => (
-            <Pressable onPress={() => handleMovieSelection(movie)}>
-              <MovieDetails
-                movie={movie}
-                isRow={false}
-                shouldShowOverview={false}
-                shouldShowTitle
-                customContainerStyle={[
-                  styles.customMovieDetailsContainer,
-                  selectedMovies.some((selected) => selected.id === movie.id) &&
-                    styles.selectedSearchResultOutline,
-                ]}
-              />
-            </Pressable>
-          )}
+          renderItem={({ item: movie }) => {
+            const isSelected = selectedMovies.some((selected) => selected.id === movie.id);
+            return (
+              <Pressable onPress={() => handleMovieSelection(movie)}>
+                <View style={styles.movieWrapper}>
+                  <MovieDetails
+                    movie={movie}
+                    isRow={false}
+                    shouldShowOverview={false}
+                    shouldShowTitle
+                    customContainerStyle={[
+                      styles.customMovieDetailsContainer,
+                      isSelected && styles.selectedSearchResultOutline,
+                    ]}
+                    customImageStyle={styles.customMovieImage}
+                  />
+                  {isSelected && (
+                    <View style={styles.checkmarkOverlay}>
+                      <View style={styles.checkmarkCircle}>
+                        <MaterialIcons name="check" size={24} color="#FFFFFF" />
+                      </View>
+                    </View>
+                  )}
+                </View>
+              </Pressable>
+            );
+          }}
           keyExtractor={(movie) => movie.id.toString()}
         />
       </View>
