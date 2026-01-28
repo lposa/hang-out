@@ -107,17 +107,17 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: '#000000',
     marginBottom: 8,
     textAlign: 'center',
   },
-  subtitle: { fontSize: 16, color: '#FFFFFF', marginBottom: 40, textAlign: 'center', opacity: 0.9 },
+  subtitle: { fontSize: 16, color: '#000000', marginBottom: 40, textAlign: 'center', opacity: 0.9 },
   form: { width: '100%' },
 
   loginButton: { borderRadius: 12, overflow: 'hidden', marginTop: 8, marginBottom: 24 },
   buttonGradient: { padding: 16, alignItems: 'center', justifyContent: 'center' },
   buttonText: { color: '#FFFFFF', fontSize: 18, fontWeight: 'bold' },
-  linkText: { color: '#FFFFFF', fontSize: 14, textAlign: 'center', opacity: 0.9 },
+  linkText: { color: '#000000', fontSize: 14, textAlign: 'center', opacity: 0.9 },
   linkBold: { fontWeight: 'bold' },
   logo: { marginBottom: 50, marginHorizontal: 'auto' },
   errorText: {

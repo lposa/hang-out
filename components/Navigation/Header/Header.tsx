@@ -12,7 +12,12 @@ export const Header = () => {
   const insets = useSafeAreaInsets();
 
   return (
-    <LinearGradient colors={['#82D0EE', '#3AAAD9']} start={[0, 0]} end={[1, 0]} style={{ flex: 1 }}>
+    <LinearGradient
+      colors={['#F4F7FB', '#E0ECFF']}
+      start={[0, 0]}
+      end={[0, 1]}
+      style={{ flex: 1 }}
+    >
       <View style={[styles.headerContainer, { paddingTop: insets.top }]}>
         <HangOutLogo width={120} height={64} />
         <LogoutButton customStyle={styles.logoutBtn} />

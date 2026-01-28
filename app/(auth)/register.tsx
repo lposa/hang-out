@@ -142,13 +142,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: '#000000',
     marginBottom: 8,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    color: '#FFFFFF',
+    color: '#000000',
     marginBottom: 40,
     textAlign: 'center',
     opacity: 0.9,
@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   linkText: {
-    color: '#FFFFFF',
+    color: '#000000',
     fontSize: 14,
     textAlign: 'center',
     opacity: 0.9,

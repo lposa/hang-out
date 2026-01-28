@@ -2,22 +2,50 @@ import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
   profileDisplayContainer: {
-    marginHorizontal: 20,
+    flex: 1,
+    paddingBottom: 20,
   },
-  list: {
-    marginTop: 20,
+  section: {
+    marginTop: 32,
+    paddingHorizontal: 20,
   },
-  listTextContainer: {
-    alignSelf: 'flex-start',
-    borderRadius: 10,
-    overflow: 'hidden',
-    paddingVertical: 3,
-    paddingHorizontal: 10,
-    marginBottom: 10,
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 16,
   },
-  listText: {
+  sectionTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
+    fontWeight: '600',
+    color: '#111827',
+    marginBottom: 4,
+  },
+  sectionSubtitle: {
+    fontSize: 13,
+    color: '#6B7280',
+    fontWeight: '400',
+  },
+
+  movieCard: {
+    marginRight: 12,
+  },
+  movieCardContainer: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 0,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+    overflow: 'hidden',
+  },
+  movieCardImage: {
+    width: '100%',
+    height: 400,
+    borderRadius: 0,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
   },
 });

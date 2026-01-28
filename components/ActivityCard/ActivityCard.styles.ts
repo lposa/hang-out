@@ -15,6 +15,11 @@ export const styles = StyleSheet.create({
     borderRadius: 75,
     top: -75,
     left: 20,
+    shadowColor: '#82D0EE',
+    shadowOffset: { width: 5, height: 5 },
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
+    elevation: 5,
   },
 
   profilePic: {
@@ -30,9 +35,9 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 85,
     paddingBottom: 20,
-    shadowColor: '#000',
+    shadowColor: '#82D0EE',
     shadowOffset: { width: 5, height: 5 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.5,
     shadowRadius: 8,
     elevation: 5,
   },

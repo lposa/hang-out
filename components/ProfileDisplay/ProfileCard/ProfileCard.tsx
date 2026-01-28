@@ -1,7 +1,6 @@
 import { Image, View, Text, ImageSourcePropType } from 'react-native';
 import { styles } from './ProfileCard.styles';
 import PLACEHOLDER_IMG from '@/assets/images/profile-placeholder.png';
-import { BlurView } from 'expo-blur';
 import { formatBirthday } from '@/helpers';
 
 interface IProfileCard {
@@ -15,15 +14,21 @@ export const ProfileCard = ({ name, birthday, imageSrc }: IProfileCard) => {
 
   return (
     <View style={styles.wrapper}>
-      <BlurView intensity={80} tint="light" style={styles.glassCard}>
+      <View style={styles.card}>
         <View style={styles.row}>
-          <Image source={source} style={styles.avatar} />
+          <View style={styles.avatarContainer}>
+            <Image source={source} style={styles.avatar} />
+            <View style={styles.statusDot} />
+          </View>
           <View style={styles.textColumn}>
             <Text style={styles.name}>{name}</Text>
             <Text style={styles.birthday}>{formatBirthday(birthday)}</Text>
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>Level 5 • Movie Enthusiast</Text>
+            </View>
           </View>
         </View>
-      </BlurView>
+      </View>
     </View>
   );
 };

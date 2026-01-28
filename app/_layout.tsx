@@ -78,9 +78,9 @@ export default function RootLayout() {
     <ScrollProvider>
       <ThemeProvider value={transparentTheme}>
         <LinearGradient
-          colors={['#82D0EE', '#3AAAD9']}
+          colors={['#F9FBFF', '#EEF3FF']}
           start={[0, 0]}
-          end={[1, 0]}
+          end={[0, 1]}
           style={{ flex: 1 }}
         >
           <Stack
@@ -100,7 +100,11 @@ export default function RootLayout() {
             />
             <Stack.Screen
               name="modal"
-              options={{ presentation: 'modal', title: 'Modal', contentStyle: { backgroundColor: 'transparent' } }}
+              options={{
+                presentation: 'modal',
+                title: 'Modal',
+                contentStyle: { backgroundColor: 'transparent' },
+              }}
             />
           </Stack>
           <StatusBar style="auto" />
