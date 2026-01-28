@@ -1,9 +1,10 @@
 import PLACEHOLDER_IMAGE from '@/assets/images/general-placeholder.png';
 import { MappedMovie } from '@/types';
+import { ImageStyle } from 'expo-image';
 import { Image, StyleProp, Text, View, ViewStyle } from 'react-native';
 import { styles } from './MovieDetails.styles';
 import { GenreTag } from '@/components/elements';
-import { ImageStyle } from 'expo-image';
+import { Ionicons } from '@expo/vector-icons';
 
 interface IMovieDetailsProps {
   movie: MappedMovie | undefined | null;
@@ -13,6 +14,16 @@ interface IMovieDetailsProps {
   customContainerStyle?: StyleProp<ViewStyle>;
   customImageStyle?: StyleProp<ImageStyle>;
 }
+
+const formatRuntime = (minutes?: number): string => {
+  if (!minutes) return '';
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  if (hours > 0) {
+    return `${hours}h ${mins}m`;
+  }
+  return `${mins}m`;
+};
 
 export const MovieDetails = ({
   movie,
@@ -27,6 +38,9 @@ export const MovieDetails = ({
   }
 
   const imageSource = movie?.image ? { uri: movie.image } : PLACEHOLDER_IMAGE;
+  const year = movie.releaseDate ? movie.releaseDate.split('-')[0] : null;
+  const runtime = formatRuntime(movie.runtime);
+  const primaryGenre = movie.genre && movie.genre.length > 0 ? movie.genre[0] : null;
 
   return (
     <View
@@ -36,25 +50,40 @@ export const MovieDetails = ({
         customContainerStyle,
       ]}
     >
+      {movie.review && movie.review !== 0 && (
+        <View style={styles.reviewContainer}>
+          <Ionicons name="star" size={14} color="#eab308" />
+          <Text style={styles.reviewText}>{movie?.review}</Text>
+        </View>
+      )}
       <Image
         source={imageSource}
         style={[styles.movieDetailsPoster, customImageStyle]}
         resizeMode="cover"
       />
       {shouldShowTitle && (
-        <Text style={styles.movieTitle} numberOfLines={2} ellipsizeMode="tail">
-          {movie.title}
-        </Text>
-      )}
-      <View style={styles.movieExtraDetails}>
-        {movie.releaseDate && <Text>{movie.releaseDate.split('-')[0]}</Text>}
-        {movie.runtime && <Text>{movie.runtime} min</Text>}
-        <View style={styles.movieGenreContainer}>
-          {movie.genre &&
-            movie?.genre?.length > 0 &&
-            movie.genre?.map((genre) => <GenreTag key={genre} text={genre} />)}
+        <View style={styles.movieInfoSection}>
+          <Text style={styles.movieTitle} numberOfLines={2} ellipsizeMode="tail">
+            {movie.title}
+          </Text>
+          <View style={styles.movieMetadataRow}>
+            {year && <Text style={styles.metadataText}>{year}</Text>}
+            {runtime && (
+              <>
+                {year && <Text style={styles.metadataSeparator}> • </Text>}
+                <Ionicons name="time-outline" size={14} color="#666" />
+                <Text style={styles.metadataText}>{runtime}</Text>
+              </>
+            )}
+            {primaryGenre && (
+              <>
+                {(year || runtime) && <Text style={styles.metadataSeparator}> • </Text>}
+                <GenreTag text={primaryGenre} />
+              </>
+            )}
+          </View>
         </View>
-      </View>
+      )}
       {shouldShowOverview && (
         <View style={styles.movieDetailsTextContainer}>
           <Text style={styles.movieDetailsOverview}>{movie.overview}</Text>

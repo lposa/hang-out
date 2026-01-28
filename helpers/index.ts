@@ -1,1 +1,2 @@
 export { getMoviePoster, mapMovie, mapMovieList } from './movies';
+export { formatBirthday } from './date';

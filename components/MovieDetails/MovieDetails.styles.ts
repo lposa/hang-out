@@ -30,13 +30,31 @@ export const styles = StyleSheet.create({
   },
 
   movieTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1F2937',
-    paddingHorizontal: 8,
-    paddingTop: 8,
-    paddingBottom: 4,
-    lineHeight: 18,
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#111827',
+    paddingHorizontal: 12,
+    paddingTop: 10,
+    paddingBottom: 6,
+    lineHeight: 20,
+  },
+  movieInfoSection: {
+    width: '100%',
+  },
+  movieMetadataRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingBottom: 10,
+  },
+  metadataText: {
+    fontSize: 12,
+    color: '#6B7280',
+    fontWeight: '500',
+  },
+  metadataSeparator: {
+    fontSize: 12,
+    color: '#9CA3AF',
   },
   movieExtraDetails: {
     flex: 1,
@@ -47,5 +65,23 @@ export const styles = StyleSheet.create({
   },
   movieGenreContainer: {
     gap: 1,
+  },
+  reviewContainer: {
+    flexDirection: 'row',
+    borderRadius: 10,
+    width: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 2,
+    position: 'absolute',
+    left: 10,
+    top: 10,
+    zIndex: 2,
+    backgroundColor: '#2f3142',
+    gap: 2,
+  },
+  reviewText: {
+    color: '#FFFFFF',
+    fontSize: 12,
   },
 });

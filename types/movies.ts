@@ -6,6 +6,7 @@ export type MappedMovie = {
   runtime?: number;
   genre?: string[];
   releaseDate?: string;
+  review?: string;
 };
 
 export interface Movie {
@@ -55,10 +56,6 @@ export interface SpokenLanguage {
   name: string;
 }
 
-// If 'belongs_to_collection' is always null or a specific object structure,
-// you might want to define MovieCollection. For this example, assuming it could be
-// an object with properties like 'id', 'name', 'poster_path', 'backdrop_path'.
-// If it's *always* null in your context, you can simplify to just `null`.
 export interface MovieCollection {
   id: number;
   name: string;

@@ -18,4 +18,9 @@ export const styles = StyleSheet.create({
     marginBottom: 8,
     fontSize: 13,
   },
+
+  inputError: {
+    borderColor: 'rgba(255, 0, 0, 0.5)',
+    borderWidth: 1,
+  },
 });

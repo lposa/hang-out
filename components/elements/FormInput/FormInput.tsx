@@ -50,9 +50,13 @@ export const FormInput = <TFieldValues extends FieldValues>({
       control={control}
       name={name}
       rules={rules}
-      render={({ field: { onChange, onBlur, value } }) => (
+      render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
         <TextInput
-          style={[styles.input, customStyle]}
+          style={[
+            styles.input,
+            error && styles.inputError,
+            customStyle,
+          ]}
           onBlur={onBlur}
           onChangeText={onChange}
           value={value}

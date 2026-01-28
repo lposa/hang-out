@@ -44,7 +44,7 @@ export default function HomeScreen() {
   return (
     <ScrollView
       style={styles.scrollViewContent}
-      contentContainerStyle={{ paddingTop: headerHeight - 40 }}
+      contentContainerStyle={{ paddingVertical: headerHeight - 40 }}
     >
       <ActivityCard {...MOCK_ACTIVITY} />
       <ActivityCard {...MOCK_ACTIVITY_2} />

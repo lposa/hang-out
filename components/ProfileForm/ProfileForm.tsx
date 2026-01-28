@@ -1,19 +1,22 @@
-import { Alert, Pressable, TextInput, View } from 'react-native';
+import { Alert, Pressable, TextInput, View, Text } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { FormInput } from '@/components/elements';
-import { useForm } from 'react-hook-form';
+import { FormInput, GradientButton, DatePickerInput } from '@/components/elements';
+import { SubmitHandler, useForm } from 'react-hook-form';
 import { styles } from './ProfileForm.style';
 import { movieDB } from '@/services';
 import { useRef, useState, useEffect } from 'react';
-import { mapMovieList } from '@/helpers';
 import { MappedMovie } from '@/types';
 import { HorizontalList } from '@/components/HorizontalList';
 import { MovieDetails } from '@/components/MovieDetails/MovieDetails';
 import { mapMovieDetails } from '@/helpers/movies';
+import { BlurView } from 'expo-blur';
+import { PROFILE_INPUT_VALIDATION_RULES, TABLE_ENUM } from '@/constants';
+import { supabase } from '@/services/Supabase';
 
 type ProfileFormData = {
   firstName: string;
   lastName: string;
+  birthday: string;
   topTenMovies: MappedMovie[] | undefined;
   topTenBooks: string[] | undefined;
   topTenShows: string[] | undefined;
@@ -25,9 +28,11 @@ const MAX_MOVIES_SELECTION = 10;
 
 export const ProfileForm = () => {
   const [movies, setMovies] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [movieResults, setMovieResults] = useState<MappedMovie[]>([]);
+
   const [selectedMovies, setSelectedMovies] = useState<MappedMovie[]>([]);
-  const debounceRef = useRef<number | null>(null);
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
   const {
     control,
@@ -35,10 +40,11 @@ export const ProfileForm = () => {
     setValue,
     formState: { errors, isValid },
   } = useForm<ProfileFormData>({
-    mode: 'onChange',
+    mode: 'onTouched',
     defaultValues: {
       firstName: '',
       lastName: '',
+      birthday: '',
       topTenBooks: [],
       topTenMovies: [],
       topTenShows: [],
@@ -111,20 +117,94 @@ export const ProfileForm = () => {
     }
   };
 
+  const onSubmit: SubmitHandler<ProfileFormData> = async (formData) => {
+    setIsSubmitting(true);
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return;
+    }
+
+    const profileData = {
+      id: user.id,
+      first_name: formData.firstName,
+      last_name: formData.lastName,
+      birthday: formData.birthday ? formData.birthday.toString() : null,
+      top_ten_movies: formData.topTenMovies,
+      updated_at: new Date(),
+    };
+
+    const { error } = await supabase.from(TABLE_ENUM.PROFILES).upsert(profileData);
+
+    if (error) {
+      Alert.alert('Error', error.message);
+    } else {
+      Alert.alert('Success', 'Profile updated!');
+    }
+
+    setIsSubmitting(false);
+  };
+
   return (
     <View style={styles.profileFormContainer}>
-      <FormInput control={control} name="firstName" placeholder="First name" />
-      <FormInput control={control} name="lastName" placeholder="Last name" />
+      <Text style={styles.headerText}>Edit Profile</Text>
+      <FormInput
+        control={control}
+        name="firstName"
+        placeholder="First name"
+        rules={PROFILE_INPUT_VALIDATION_RULES.firstName}
+      />
+
+      {errors.firstName && <Text style={styles.errorText}>{errors.firstName.message}</Text>}
+
+      <FormInput
+        control={control}
+        name="lastName"
+        placeholder="Last name"
+        rules={PROFILE_INPUT_VALIDATION_RULES.lastName}
+      />
+
+      {errors.lastName && <Text style={styles.errorText}>{errors.lastName.message}</Text>}
+
+      <DatePickerInput
+        control={control}
+        name="birthday"
+        placeholder="Birthday"
+        rules={PROFILE_INPUT_VALIDATION_RULES.birthday}
+        maximumDate={new Date()}
+      />
+
+      {errors.birthday && <Text style={styles.errorText}>{errors.birthday.message}</Text>}
 
       <View>
         <TextInput
           placeholder="Search movies..."
           style={styles.input}
           value={movies}
-          // Pass the text directly to your handler
           onChangeText={handleMovieSearch}
-        />
+        ></TextInput>
 
+        {movieResults.length > 0 && (
+          <View style={styles.selectionContainer}>
+            <View style={styles.selectionItemWrapper}>
+              <BlurView style={styles.selectionItem} tint="dark" intensity={80}>
+                <Text style={styles.selectionText}>
+                  {selectedMovies.length}/{MAX_MOVIES_SELECTION}
+                </Text>
+              </BlurView>
+            </View>
+
+            <Pressable onPress={() => setSelectedMovies([])}>
+              <View style={styles.selectionItemWrapper}>
+                <BlurView tint="dark" style={styles.selectionItem} intensity={80}>
+                  <Text style={styles.selectionText}>Clear selection</Text>
+                </BlurView>
+              </View>
+            </Pressable>
+          </View>
+        )}
         <HorizontalList
           data={movieResults}
           renderItem={({ item: movie }) => {
@@ -157,6 +237,13 @@ export const ProfileForm = () => {
           keyExtractor={(movie) => movie.id.toString()}
         />
       </View>
+
+      <GradientButton
+        text="Save profile"
+        disabled={!isValid}
+        onPress={handleSubmit(onSubmit)}
+        loading={isSubmitting}
+      />
     </View>
   );
 };

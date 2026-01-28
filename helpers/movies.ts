@@ -32,5 +32,6 @@ export const mapMovieDetails = (movie: TMDBMovieDetailsResponse): MappedMovie =>
     genre: movie?.genres.map((genre) => genre.name),
     releaseDate: movie?.release_date,
     runtime: movie?.runtime,
+    review: movie?.vote_average.toFixed(1),
   };
 };

@@ -4,6 +4,12 @@ export const styles = StyleSheet.create({
   profileFormContainer: {
     paddingHorizontal: 20,
   },
+  headerText: {
+    fontSize: 24,
+    textAlign: 'center',
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
   input: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
@@ -15,7 +21,7 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-start',
     width: 250,
-    height: 450,
+    height: 400,
     backgroundColor: '#FFFFFF',
     borderRadius: 10,
     overflow: 'hidden',
@@ -62,5 +68,31 @@ export const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 5,
+  },
+  selectionContainer: {
+    padding: 4,
+    borderRadius: 10,
+    marginBottom: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  selectionText: {
+    color: '#FFFFFF',
+  },
+  selectionItemWrapper: {
+    borderRadius: 10,
+    overflow: 'hidden',
+  },
+  selectionItem: {
+    padding: 4,
+  },
+  errorText: {
+    color: '#FFECEC',
+    backgroundColor: 'rgba(255, 0, 0, 0.5)',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    marginBottom: 16,
+    fontSize: 13,
   },
 });

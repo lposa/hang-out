@@ -6,6 +6,7 @@ import { ACTIVITY_TYPES_ENUM } from '@/constants/activity-types';
 import { ActivityPosterDetails } from '@/components/ActivityPosterDetails/ActivityPosterDetails';
 import { MovieDetails } from '@/components/MovieDetails/MovieDetails';
 import { useMovieDb } from '@/hooks/useMovieDb';
+import { GradientButton } from '@/components/elements';
 
 export type ActivityPoster = {
   name: string;
@@ -80,16 +81,7 @@ export const ActivityCard = ({
             </View>
           </View>
         </View>
-        <Pressable style={styles.actionButton}>
-          <LinearGradient
-            colors={['#FFC371', '#FF5F6D', '#D92550']}
-            start={[0, 0.5]}
-            end={[1, 0.5]}
-            style={styles.actionButtonGradient}
-          >
-            <Text style={styles.actionButtonText}>Join Activity</Text>
-          </LinearGradient>
-        </Pressable>
+        <GradientButton text="Join Activity" />
       </View>
     </View>
   );

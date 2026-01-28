@@ -57,7 +57,6 @@ export default function LoginScreen() {
             name="email"
             placeholder="Email"
             rules={INPUT_VALIDATION_RULES.email}
-            customStyle={errors.email && { borderColor: 'red', borderWidth: 1 }}
           />
 
           {errors.email && <Text style={styles.errorText}>{errors.email.message}</Text>}
@@ -68,7 +67,6 @@ export default function LoginScreen() {
             placeholder="Password"
             secureTextEntry
             rules={INPUT_VALIDATION_RULES.password}
-            customStyle={errors.password && { borderColor: 'red', borderWidth: 1 }}
           />
 
           {errors.password && <Text style={styles.errorText}>{errors.password.message}</Text>}

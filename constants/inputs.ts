@@ -20,3 +20,42 @@ export const INPUT_VALIDATION_RULES = {
     validate: (value: string) => value === passwordValue || 'Passwords do not match',
   }),
 };
+
+export const PROFILE_INPUT_VALIDATION_RULES = {
+  firstName: {
+    required: 'Name is required',
+  },
+  lastName: {
+    required: 'Name is required',
+  },
+  birthday: {
+    required: 'Birthday is required',
+    validate: (value: any) => {
+      if (!value || typeof value !== 'string') {
+        return 'Birthday is required';
+      }
+      const birthDate = new Date(value);
+      if (isNaN(birthDate.getTime())) {
+        return 'Invalid date';
+      }
+      const today = new Date();
+      const age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        const actualAge = age - 1;
+        if (actualAge < 13) {
+          return 'You must be at least 13 years old';
+        }
+      } else if (age < 13) {
+        return 'You must be at least 13 years old';
+      }
+      
+      if (birthDate > today) {
+        return 'Birthday cannot be in the future';
+      }
+      
+      return true;
+    },
+  },
+};
