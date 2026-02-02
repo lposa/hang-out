@@ -5,6 +5,7 @@ import { Image, StyleProp, Text, View, ViewStyle } from 'react-native';
 import { styles } from './MovieDetails.styles';
 import { GenreTag } from '@/components/elements';
 import { Ionicons } from '@expo/vector-icons';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 interface IMovieDetailsProps {
   movie: MappedMovie | undefined | null;
@@ -13,6 +14,7 @@ interface IMovieDetailsProps {
   shouldShowTitle?: boolean;
   customContainerStyle?: StyleProp<ViewStyle>;
   customImageStyle?: StyleProp<ImageStyle>;
+  isEditMode?: boolean;
 }
 
 const formatRuntime = (minutes?: number): string => {
@@ -32,6 +34,7 @@ export const MovieDetails = ({
   shouldShowTitle = false,
   customContainerStyle,
   customImageStyle,
+  isEditMode = false,
 }: IMovieDetailsProps) => {
   if (!movie) {
     return null;
@@ -50,10 +53,16 @@ export const MovieDetails = ({
         customContainerStyle,
       ]}
     >
-      {movie.review && movie.review !== 0 && (
-        <View style={styles.reviewContainer}>
+      {movie.review && parseFloat(movie.review) !== 0 && (
+        <View style={[styles.reviewContainer, styles.imageBadge]}>
           <Ionicons name="star" size={14} color="#eab308" />
           <Text style={styles.reviewText}>{movie?.review}</Text>
+        </View>
+      )}
+
+      {isEditMode && (
+        <View style={[styles.removeIcon, styles.imageBadge]}>
+          <MaterialIcons name="delete" size={24} color="#FFF" />
         </View>
       )}
       <Image

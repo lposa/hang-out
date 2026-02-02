@@ -1,15 +1,16 @@
-import { Image, View, Text, ImageSourcePropType } from 'react-native';
+import { Image, View, Text, ImageSourcePropType, Pressable } from 'react-native';
 import { styles } from './ProfileCard.styles';
 import PLACEHOLDER_IMG from '@/assets/images/profile-placeholder.png';
 import { formatBirthday } from '@/helpers';
 
 interface IProfileCard {
   name: string;
-  birthday: string;
-  imageSrc: string;
+  birthday: string | null;
+  imageSrc: string | undefined;
+  onEdit?: () => void;
 }
 
-export const ProfileCard = ({ name, birthday, imageSrc }: IProfileCard) => {
+export const ProfileCard = ({ name, birthday, imageSrc, onEdit }: IProfileCard) => {
   const source: ImageSourcePropType = imageSrc ? { uri: imageSrc } : PLACEHOLDER_IMG;
 
   return (
@@ -27,6 +28,12 @@ export const ProfileCard = ({ name, birthday, imageSrc }: IProfileCard) => {
               <Text style={styles.badgeText}>Level 5 • Movie Enthusiast</Text>
             </View>
           </View>
+        </View>
+
+        <View style={styles.controlCenter}>
+          <Pressable style={styles.controlButton} onPress={onEdit}>
+            <Text>Update profile</Text>
+          </Pressable>
         </View>
       </View>
     </View>

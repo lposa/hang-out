@@ -48,4 +48,9 @@ export const styles = StyleSheet.create({
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
   },
+  editButton: {
+    padding: 10,
+    backgroundColor: '#E5F0FF',
+    borderRadius: 12,
+  },
 });

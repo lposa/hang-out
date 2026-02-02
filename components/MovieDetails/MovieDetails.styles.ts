@@ -66,7 +66,7 @@ export const styles = StyleSheet.create({
   movieGenreContainer: {
     gap: 1,
   },
-  reviewContainer: {
+  imageBadge: {
     flexDirection: 'row',
     borderRadius: 8,
     paddingHorizontal: 8,
@@ -74,15 +74,21 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     position: 'absolute',
-    left: 12,
-    top: 12,
     zIndex: 2,
     backgroundColor: 'rgba(0, 0, 0, 0.65)',
     gap: 4,
+  },
+  reviewContainer: {
+    left: 12,
+    top: 12,
   },
   reviewText: {
     color: '#FFFFFF',
     fontSize: 12,
     fontWeight: '600',
+  },
+  removeIcon: {
+    right: 12,
+    top: 12,
   },
 });

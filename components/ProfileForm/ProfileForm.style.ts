@@ -8,7 +8,7 @@ export const styles = StyleSheet.create({
     fontSize: 24,
     textAlign: 'center',
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginVertical: 20,
   },
   input: {
     backgroundColor: '#FFFFFF',
@@ -94,5 +94,22 @@ export const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 16,
     fontSize: 13,
+  },
+
+  buttonContainer: {
+    marginTop: 10,
+  },
+
+  cancelButton: {
+    backgroundColor: '#FFFFFF',
+    padding: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 16,
+  },
+
+  cancelButtonText: {
+    fontWeight: 'bold',
   },
 });

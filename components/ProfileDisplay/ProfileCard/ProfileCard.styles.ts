@@ -69,4 +69,17 @@ export const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#2563EB',
   },
+
+  controlCenter: {
+    marginTop: 16,
+  },
+
+  controlButton: {
+    backgroundColor: '#E5F0FF',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });

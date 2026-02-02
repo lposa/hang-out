@@ -1,17 +1,18 @@
-import { Alert, Pressable, TextInput, View, Text } from 'react-native';
+import { Pressable, TextInput, View, Text } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { FormInput, GradientButton, DatePickerInput } from '@/components/elements';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { styles } from './ProfileForm.style';
 import { movieDB } from '@/services';
 import { useRef, useState, useEffect } from 'react';
-import { MappedMovie } from '@/types';
+import { MappedMovie, Profile } from '@/types';
 import { HorizontalList } from '@/components/HorizontalList';
 import { MovieDetails } from '@/components/MovieDetails/MovieDetails';
 import { mapMovieDetails } from '@/helpers/movies';
 import { BlurView } from 'expo-blur';
 import { PROFILE_INPUT_VALIDATION_RULES, TABLE_ENUM } from '@/constants';
 import { supabase } from '@/services/Supabase';
+import { Toast, ToastType } from '@/components/Toast';
 
 type ProfileFormData = {
   firstName: string;
@@ -26,10 +27,28 @@ const DEBOUNCE_MS = 500;
 
 const MAX_MOVIES_SELECTION = 10;
 
-export const ProfileForm = () => {
+export enum FORM_MODES {
+  EDIT = 'edit',
+  CREATE = 'create',
+}
+
+interface IProfileForm {
+  onDone: () => void;
+  initialProfile: Profile | undefined;
+  formMode: FORM_MODES;
+}
+
+export const ProfileForm = ({
+  onDone,
+  initialProfile,
+  formMode = FORM_MODES.CREATE,
+}: IProfileForm) => {
   const [movies, setMovies] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [movieResults, setMovieResults] = useState<MappedMovie[]>([]);
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState<ToastType>('success');
 
   const [selectedMovies, setSelectedMovies] = useState<MappedMovie[]>([]);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
@@ -38,6 +57,7 @@ export const ProfileForm = () => {
     control,
     handleSubmit,
     setValue,
+    reset,
     formState: { errors, isValid },
   } = useForm<ProfileFormData>({
     mode: 'onTouched',
@@ -60,8 +80,19 @@ export const ProfileForm = () => {
   }, []);
 
   useEffect(() => {
+    if (!initialProfile || formMode !== FORM_MODES.EDIT) return;
+
+    reset({
+      firstName: initialProfile.first_name ?? '',
+      lastName: initialProfile.last_name ?? '',
+      birthday: initialProfile.birthday ?? '',
+      topTenMovies: initialProfile.top_ten_movies ?? [],
+    });
+  }, [initialProfile, formMode, reset]);
+
+  useEffect(() => {
     setValue('topTenMovies', selectedMovies);
-  }, [selectedMovies, setValue]);
+  }, [formMode, initialProfile, selectedMovies, setValue]);
 
   const handleMovieSearch = (movieName: string) => {
     setMovies(movieName);
@@ -100,6 +131,12 @@ export const ProfileForm = () => {
     }, DEBOUNCE_MS);
   };
 
+  const showToast = (message: string, type: ToastType) => {
+    setToastMessage(message);
+    setToastType(type);
+    setToastVisible(true);
+  };
+
   const handleMovieSelection = (movie: MappedMovie) => {
     const isAlreadySelected = selectedMovies.some((selected) => selected.id === movie.id);
 
@@ -109,10 +146,7 @@ export const ProfileForm = () => {
       if (selectedMovies.length < MAX_MOVIES_SELECTION) {
         setSelectedMovies((prev) => [...prev, movie]);
       } else {
-        Alert.alert(
-          'Selection Limit Reached',
-          `You can select a maximum of ${MAX_MOVIES_SELECTION} movies.`
-        );
+        showToast(`You can select a maximum of ${MAX_MOVIES_SELECTION} movies.`, 'error');
       }
     }
   };
@@ -127,29 +161,48 @@ export const ProfileForm = () => {
       return;
     }
 
-    const profileData = {
+    let profileData: Profile = {
       id: user.id,
       first_name: formData.firstName,
       last_name: formData.lastName,
       birthday: formData.birthday ? formData.birthday.toString() : null,
-      top_ten_movies: formData.topTenMovies,
       updated_at: new Date(),
     };
 
-    const { error } = await supabase.from(TABLE_ENUM.PROFILES).upsert(profileData);
-
-    if (error) {
-      Alert.alert('Error', error.message);
-    } else {
-      Alert.alert('Success', 'Profile updated!');
+    if (formMode === FORM_MODES.CREATE) {
+      profileData.top_ten_movies = formData.topTenMovies;
     }
 
+    const { error } = await supabase.from(TABLE_ENUM.PROFILES).upsert(profileData);
+
     setIsSubmitting(false);
+
+    if (error) {
+      showToast(error.message || 'Failed to save profile', 'error');
+    } else {
+      showToast(
+        formMode === FORM_MODES.CREATE
+          ? 'Profile created successfully!'
+          : 'Profile updated successfully!',
+        'success'
+      );
+      setTimeout(() => {
+        onDone();
+      }, 1500);
+    }
   };
 
   return (
     <View style={styles.profileFormContainer}>
-      <Text style={styles.headerText}>Edit Profile</Text>
+      <Toast
+        message={toastMessage}
+        type={toastType}
+        visible={toastVisible}
+        onHide={() => setToastVisible(false)}
+      />
+      <Text style={styles.headerText}>
+        {formMode === FORM_MODES.CREATE ? 'Update Profile' : 'Edit Profile'}
+      </Text>
       <FormInput
         control={control}
         name="firstName"
@@ -178,72 +231,86 @@ export const ProfileForm = () => {
 
       {errors.birthday && <Text style={styles.errorText}>{errors.birthday.message}</Text>}
 
-      <View>
-        <TextInput
-          placeholder="Search movies..."
-          style={styles.input}
-          value={movies}
-          onChangeText={handleMovieSearch}
-        ></TextInput>
+      {formMode === FORM_MODES.CREATE && (
+        <View>
+          <TextInput
+            placeholder="Search movies..."
+            style={styles.input}
+            value={movies}
+            onChangeText={handleMovieSearch}
+          ></TextInput>
 
-        {movieResults.length > 0 && (
-          <View style={styles.selectionContainer}>
-            <View style={styles.selectionItemWrapper}>
-              <BlurView style={styles.selectionItem} tint="dark" intensity={80}>
-                <Text style={styles.selectionText}>
-                  {selectedMovies.length}/{MAX_MOVIES_SELECTION}
-                </Text>
-              </BlurView>
-            </View>
-
-            <Pressable onPress={() => setSelectedMovies([])}>
+          {movieResults.length > 0 && (
+            <View style={styles.selectionContainer}>
               <View style={styles.selectionItemWrapper}>
-                <BlurView tint="dark" style={styles.selectionItem} intensity={80}>
-                  <Text style={styles.selectionText}>Clear selection</Text>
+                <BlurView style={styles.selectionItem} tint="dark" intensity={80}>
+                  <Text style={styles.selectionText}>
+                    {selectedMovies.length}/{MAX_MOVIES_SELECTION}
+                  </Text>
                 </BlurView>
               </View>
-            </Pressable>
-          </View>
-        )}
-        <HorizontalList
-          data={movieResults}
-          renderItem={({ item: movie }) => {
-            const isSelected = selectedMovies.some((selected) => selected.id === movie.id);
-            return (
-              <Pressable onPress={() => handleMovieSelection(movie)}>
-                <View style={styles.movieWrapper}>
-                  <MovieDetails
-                    movie={movie}
-                    isRow={false}
-                    shouldShowOverview={false}
-                    shouldShowTitle
-                    customContainerStyle={[
-                      styles.customMovieDetailsContainer,
-                      isSelected && styles.selectedSearchResultOutline,
-                    ]}
-                    customImageStyle={styles.customMovieImage}
-                  />
-                  {isSelected && (
-                    <View style={styles.checkmarkOverlay}>
-                      <View style={styles.checkmarkCircle}>
-                        <MaterialIcons name="check" size={24} color="#FFFFFF" />
-                      </View>
-                    </View>
-                  )}
+
+              <Pressable onPress={() => setSelectedMovies([])}>
+                <View style={styles.selectionItemWrapper}>
+                  <BlurView tint="dark" style={styles.selectionItem} intensity={80}>
+                    <Text style={styles.selectionText}>Clear selection</Text>
+                  </BlurView>
                 </View>
               </Pressable>
-            );
-          }}
-          keyExtractor={(movie) => movie.id.toString()}
-        />
-      </View>
+            </View>
+          )}
 
-      <GradientButton
-        text="Save profile"
-        disabled={!isValid}
-        onPress={handleSubmit(onSubmit)}
-        loading={isSubmitting}
-      />
+          <HorizontalList
+            data={
+              initialProfile && initialProfile.top_ten_movies
+                ? initialProfile.top_ten_movies
+                : movieResults
+            }
+            renderItem={({ item: movie }) => {
+              const isSelected = selectedMovies.some((selected) => selected.id === movie.id);
+              return (
+                <Pressable onPress={() => handleMovieSelection(movie)}>
+                  <View style={styles.movieWrapper}>
+                    <MovieDetails
+                      movie={movie}
+                      isRow={false}
+                      shouldShowOverview={false}
+                      shouldShowTitle
+                      customContainerStyle={[
+                        styles.customMovieDetailsContainer,
+                        isSelected && styles.selectedSearchResultOutline,
+                      ]}
+                      customImageStyle={styles.customMovieImage}
+                    />
+                    {isSelected && (
+                      <View style={styles.checkmarkOverlay}>
+                        <View style={styles.checkmarkCircle}>
+                          <MaterialIcons name="check" size={24} color="#FFFFFF" />
+                        </View>
+                      </View>
+                    )}
+                  </View>
+                </Pressable>
+              );
+            }}
+            keyExtractor={(movie) => movie.id.toString()}
+          />
+        </View>
+      )}
+
+      <View style={styles.buttonContainer}>
+        <GradientButton
+          text="Save profile"
+          disabled={!isValid}
+          onPress={handleSubmit(onSubmit)}
+          loading={isSubmitting}
+        />
+        {formMode === FORM_MODES.EDIT && (
+          <Pressable onPress={onDone} style={styles.cancelButton}>
+            <Text style={styles.cancelButtonText}>Cancel</Text>
+          </Pressable>
+        )}
+      </View>
     </View>
   );
 };

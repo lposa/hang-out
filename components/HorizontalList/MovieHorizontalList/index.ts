@@ -1,0 +1,1 @@
+export { MovieHorizontalList } from './MovieHorizontalList';
