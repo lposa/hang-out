@@ -18,7 +18,7 @@ export const styles = StyleSheet.create({
   },
   movieCardImage: {
     width: '100%',
-    height: 200,
+    height: 400,
     borderRadius: 0,
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,

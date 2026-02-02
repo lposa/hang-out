@@ -46,5 +46,6 @@ export const useProfile = () => {
   return {
     profileLoading: loading,
     profile,
+    refetch: getProfileFromDB,
   };
 };

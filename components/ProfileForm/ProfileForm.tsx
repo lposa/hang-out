@@ -3,16 +3,15 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { FormInput, GradientButton, DatePickerInput } from '@/components/elements';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { styles } from './ProfileForm.style';
-import { movieDB } from '@/services';
-import { useRef, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { MappedMovie, Profile } from '@/types';
 import { HorizontalList } from '@/components/HorizontalList';
 import { MovieDetails } from '@/components/MovieDetails/MovieDetails';
-import { mapMovieDetails } from '@/helpers/movies';
 import { BlurView } from 'expo-blur';
 import { PROFILE_INPUT_VALIDATION_RULES, TABLE_ENUM } from '@/constants';
 import { supabase } from '@/services/Supabase';
 import { Toast, ToastType } from '@/components/Toast';
+import { useSearch } from '@/hooks';
 
 type ProfileFormData = {
   firstName: string;
@@ -22,8 +21,6 @@ type ProfileFormData = {
   topTenBooks: string[] | undefined;
   topTenShows: string[] | undefined;
 };
-
-const DEBOUNCE_MS = 500;
 
 const MAX_MOVIES_SELECTION = 10;
 
@@ -43,15 +40,13 @@ export const ProfileForm = ({
   initialProfile,
   formMode = FORM_MODES.CREATE,
 }: IProfileForm) => {
-  const [movies, setMovies] = useState<string>('');
+  const { movies, movieResults, handleMovieSearch } = useSearch();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [movieResults, setMovieResults] = useState<MappedMovie[]>([]);
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState<ToastType>('success');
 
   const [selectedMovies, setSelectedMovies] = useState<MappedMovie[]>([]);
-  const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
   const {
     control,
@@ -72,14 +67,6 @@ export const ProfileForm = ({
   });
 
   useEffect(() => {
-    return () => {
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current);
-      }
-    };
-  }, []);
-
-  useEffect(() => {
     if (!initialProfile || formMode !== FORM_MODES.EDIT) return;
 
     reset({
@@ -93,43 +80,6 @@ export const ProfileForm = ({
   useEffect(() => {
     setValue('topTenMovies', selectedMovies);
   }, [formMode, initialProfile, selectedMovies, setValue]);
-
-  const handleMovieSearch = (movieName: string) => {
-    setMovies(movieName);
-
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
-    }
-
-    debounceRef.current = setTimeout(async () => {
-      if (movieName.trim().length === 0) {
-        return;
-      }
-
-      const movies = await movieDB.getMoviesByName(movieName);
-
-      if (!movies || movies.results.length === 0) {
-        console.error('No movies found');
-        return;
-      }
-
-      const detailedMoviesPromises = movies.results.map(async (movie) => {
-        const movieDetail = await movieDB.getMovieById(movie.id);
-        if (movieDetail) {
-          return mapMovieDetails(movieDetail);
-        }
-        return null;
-      });
-
-      const allMappedMovies = await Promise.all(detailedMoviesPromises);
-
-      const validMappedMovies = allMappedMovies.filter(
-        (movie): movie is MappedMovie => movie !== null
-      );
-
-      setMovieResults(validMappedMovies);
-    }, DEBOUNCE_MS);
-  };
 
   const showToast = (message: string, type: ToastType) => {
     setToastMessage(message);

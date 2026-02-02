@@ -7,7 +7,7 @@ import { styles } from './MovieHorizontalList.styles';
 
 interface IMovieHorizontalListProps {
   data: MappedMovie[];
-  onDelete?: (movie: MappedMovie) => void;
+  onDelete?: (movieId: number) => void;
   showDelete?: boolean;
 }
 
@@ -34,10 +34,7 @@ export const MovieHorizontalList = ({
             customImageStyle={styles.movieCardImage}
           />
           {showDelete && onDelete && (
-            <Pressable
-              style={styles.deleteButton}
-              onPress={() => onDelete(movie)}
-            >
+            <Pressable style={styles.deleteButton} onPress={() => onDelete(movie.id)}>
               <MaterialIcons name="delete" size={20} color="#FFFFFF" />
             </Pressable>
           )}
