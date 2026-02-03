@@ -1,10 +1,14 @@
-import { Alert, Pressable, View, Text } from 'react-native';
+import { Pressable, View, Text } from 'react-native';
 import { MappedMovie } from '@/types';
 import { MovieHorizontalList } from '@/components/HorizontalList/MovieHorizontalList';
 import { TABLE_ENUM } from '@/constants';
 import { supabase } from '@/services/Supabase';
 import { useState } from 'react';
 import { styles } from './EditCardsForm.styles';
+import { useToast } from '@/context/ToastContext';
+import { MovieSearch } from '@/components/Search';
+import { useMovieSelection } from '@/hooks/useMovieSelection';
+import { GradientButton } from '@/components/elements';
 
 interface IEditCardsFormProps {
   data: MappedMovie[];
@@ -12,12 +16,25 @@ interface IEditCardsFormProps {
   onDone: () => void;
 }
 
+enum TAB_ENUM {
+  SEARCH = 'search',
+  EDIT = 'edit',
+}
+
 export const EditCardsForm = ({ data, userId, onDone }: IEditCardsFormProps) => {
   const [movies, setMovies] = useState<MappedMovie[]>(data);
+  const { showToast } = useToast();
+  const [activeTab, setActiveTab] = useState<TAB_ENUM>(TAB_ENUM.EDIT);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const { handleMovieSelection, selectedMovies, clearSelection } = useMovieSelection({
+    existingCount: movies.length,
+    maxSelection: 10,
+  });
 
   const handleDelete = async (movieId: number) => {
     if (!userId) {
-      Alert.alert('Error', 'No user logged in');
+      showToast('No user logged in', 'error');
       return;
     }
 
@@ -31,18 +48,98 @@ export const EditCardsForm = ({ data, userId, onDone }: IEditCardsFormProps) => 
 
     if (error) {
       setMovies(movies);
-      Alert.alert('Error', error.message);
+      showToast(error.message || 'Failed to delete movie', 'error');
+    } else {
+      showToast('Movie removed successfully', 'success');
     }
+  };
+
+  const handleSubmit = async () => {
+    if (!userId) {
+      showToast('No user logged in', 'error');
+      return;
+    }
+
+    setIsLoading(true);
+
+    const mergedMovies = [...movies];
+
+    selectedMovies.forEach((movie) => {
+      const exists = mergedMovies.some((m) => m.id === movie.id);
+      if (!exists && mergedMovies.length < 10) {
+        mergedMovies.push(movie);
+      }
+    });
+
+    const { error } = await supabase
+      .from(TABLE_ENUM.PROFILES)
+      .update({ top_ten_movies: mergedMovies })
+      .eq('id', userId);
+
+    if (error) {
+      showToast(error.message || 'Failed to update movies', 'error');
+      return;
+    }
+
+    setMovies(mergedMovies);
+    clearSelection();
+    setActiveTab(TAB_ENUM.EDIT);
+    showToast('Top 10 movies updated', 'success');
+    setIsLoading(false);
   };
 
   return (
     <View style={styles.formContainer}>
-      <View style={styles.counterContainer}>
-        <Text style={styles.counterText}>{movies.length} / 10 movies selected</Text>
+      <View style={styles.tabsContainer}>
+        <Pressable
+          style={[styles.tabButton, activeTab === TAB_ENUM.EDIT && styles.tabButtonActive]}
+          onPress={() => setActiveTab(TAB_ENUM.EDIT)}
+        >
+          <Text style={[styles.tabText, activeTab === TAB_ENUM.EDIT && styles.tabTextActive]}>
+            Edit
+          </Text>
+        </Pressable>
+        <Pressable
+          style={[styles.tabButton, activeTab === TAB_ENUM.SEARCH && styles.tabButtonActive]}
+          onPress={() => setActiveTab(TAB_ENUM.SEARCH)}
+        >
+          <Text style={[styles.tabText, activeTab === TAB_ENUM.SEARCH && styles.tabTextActive]}>
+            Search
+          </Text>
+        </Pressable>
       </View>
-      <MovieHorizontalList data={movies} showDelete={true} onDelete={handleDelete} />
+
+      {activeTab === TAB_ENUM.SEARCH && (
+        <MovieSearch
+          selectedMovies={selectedMovies}
+          onMovieSelect={handleMovieSelection}
+          onClearSelection={clearSelection}
+          existingMoviesCount={movies.length}
+          maxSelection={10}
+        />
+      )}
+
+      {(activeTab === TAB_ENUM.EDIT ||
+        (activeTab === TAB_ENUM.SEARCH && selectedMovies.length > 0)) && (
+        <View style={styles.counterContainer}>
+          <Text style={styles.counterText}>{movies.length + selectedMovies.length} / 10</Text>
+        </View>
+      )}
+
+      {activeTab === TAB_ENUM.EDIT && (
+        <MovieHorizontalList data={movies} showDelete={true} onDelete={handleDelete} />
+      )}
+
+      {activeTab === TAB_ENUM.SEARCH && (
+        <GradientButton
+          text="Save profile"
+          onPress={handleSubmit}
+          disabled={isLoading || !(selectedMovies.length > 0)}
+          loading={isLoading}
+        />
+      )}
       <Pressable onPress={onDone} style={styles.cancelButton}>
-        <Text style={styles.cancelButtonText}>Done</Text>
+        <Text style={styles.cancelButtonText}>Cancel</Text>
       </Pressable>
     </View>
   );

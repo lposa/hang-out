@@ -91,4 +91,21 @@ export const styles = StyleSheet.create({
     right: 12,
     top: 12,
   },
+
+  imageContainer: {
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  skeleton: {
+    position: 'absolute',
+    backgroundColor: '#D1D5DB',
+    zIndex: 1,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  imageLoading: {
+    opacity: 0,
+  },
 });

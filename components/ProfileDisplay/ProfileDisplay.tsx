@@ -3,7 +3,7 @@ import { styles } from './ProfileDisplay.style';
 import { Profile } from '@/types';
 import { ProfileCard } from '@/components/ProfileDisplay/ProfileCard/ProfileCard';
 import { MovieHorizontalList } from '@/components/HorizontalList/MovieHorizontalList';
-import { SCREEN_MODE_ENUM } from '@/app/(tabs)/profile';
+import { SCREEN_MODE_ENUM } from '@/constants';
 
 interface IProfileDisplay {
   profile: Profile;

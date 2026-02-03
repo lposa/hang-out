@@ -1,17 +1,14 @@
-import { Pressable, TextInput, View, Text } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+import { Pressable, View, Text } from 'react-native';
 import { FormInput, GradientButton, DatePickerInput } from '@/components/elements';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { styles } from './ProfileForm.style';
 import { useState, useEffect } from 'react';
 import { MappedMovie, Profile } from '@/types';
-import { HorizontalList } from '@/components/HorizontalList';
-import { MovieDetails } from '@/components/MovieDetails/MovieDetails';
-import { BlurView } from 'expo-blur';
-import { PROFILE_INPUT_VALIDATION_RULES, TABLE_ENUM } from '@/constants';
+import { MAX_MOVIES_SELECTION, PROFILE_INPUT_VALIDATION_RULES, TABLE_ENUM } from '@/constants';
 import { supabase } from '@/services/Supabase';
-import { Toast, ToastType } from '@/components/Toast';
-import { useSearch } from '@/hooks';
+import { MovieSearch } from '@/components/Search';
+import { useMovieSelection } from '@/hooks/useMovieSelection';
+import { useToast } from '@/context/ToastContext';
 
 type ProfileFormData = {
   firstName: string;
@@ -21,8 +18,6 @@ type ProfileFormData = {
   topTenBooks: string[] | undefined;
   topTenShows: string[] | undefined;
 };
-
-const MAX_MOVIES_SELECTION = 10;
 
 export enum FORM_MODES {
   EDIT = 'edit',
@@ -40,13 +35,10 @@ export const ProfileForm = ({
   initialProfile,
   formMode = FORM_MODES.CREATE,
 }: IProfileForm) => {
-  const { movies, movieResults, handleMovieSearch } = useSearch();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [toastVisible, setToastVisible] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
-  const [toastType, setToastType] = useState<ToastType>('success');
+  const { handleMovieSelection, selectedMovies, clearSelection } = useMovieSelection();
+  const { showToast } = useToast();
 
-  const [selectedMovies, setSelectedMovies] = useState<MappedMovie[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     control,
@@ -80,26 +72,6 @@ export const ProfileForm = ({
   useEffect(() => {
     setValue('topTenMovies', selectedMovies);
   }, [formMode, initialProfile, selectedMovies, setValue]);
-
-  const showToast = (message: string, type: ToastType) => {
-    setToastMessage(message);
-    setToastType(type);
-    setToastVisible(true);
-  };
-
-  const handleMovieSelection = (movie: MappedMovie) => {
-    const isAlreadySelected = selectedMovies.some((selected) => selected.id === movie.id);
-
-    if (isAlreadySelected) {
-      setSelectedMovies((prev) => prev.filter((selected) => selected.id !== movie.id));
-    } else {
-      if (selectedMovies.length < MAX_MOVIES_SELECTION) {
-        setSelectedMovies((prev) => [...prev, movie]);
-      } else {
-        showToast(`You can select a maximum of ${MAX_MOVIES_SELECTION} movies.`, 'error');
-      }
-    }
-  };
 
   const onSubmit: SubmitHandler<ProfileFormData> = async (formData) => {
     setIsSubmitting(true);
@@ -144,12 +116,6 @@ export const ProfileForm = ({
 
   return (
     <View style={styles.profileFormContainer}>
-      <Toast
-        message={toastMessage}
-        type={toastType}
-        visible={toastVisible}
-        onHide={() => setToastVisible(false)}
-      />
       <Text style={styles.headerText}>
         {formMode === FORM_MODES.CREATE ? 'Update Profile' : 'Edit Profile'}
       </Text>
@@ -182,70 +148,14 @@ export const ProfileForm = ({
       {errors.birthday && <Text style={styles.errorText}>{errors.birthday.message}</Text>}
 
       {formMode === FORM_MODES.CREATE && (
-        <View>
-          <TextInput
-            placeholder="Search movies..."
-            style={styles.input}
-            value={movies}
-            onChangeText={handleMovieSearch}
-          ></TextInput>
-
-          {movieResults.length > 0 && (
-            <View style={styles.selectionContainer}>
-              <View style={styles.selectionItemWrapper}>
-                <BlurView style={styles.selectionItem} tint="dark" intensity={80}>
-                  <Text style={styles.selectionText}>
-                    {selectedMovies.length}/{MAX_MOVIES_SELECTION}
-                  </Text>
-                </BlurView>
-              </View>
-
-              <Pressable onPress={() => setSelectedMovies([])}>
-                <View style={styles.selectionItemWrapper}>
-                  <BlurView tint="dark" style={styles.selectionItem} intensity={80}>
-                    <Text style={styles.selectionText}>Clear selection</Text>
-                  </BlurView>
-                </View>
-              </Pressable>
-            </View>
-          )}
-
-          <HorizontalList
-            data={
-              initialProfile && initialProfile.top_ten_movies
-                ? initialProfile.top_ten_movies
-                : movieResults
-            }
-            renderItem={({ item: movie }) => {
-              const isSelected = selectedMovies.some((selected) => selected.id === movie.id);
-              return (
-                <Pressable onPress={() => handleMovieSelection(movie)}>
-                  <View style={styles.movieWrapper}>
-                    <MovieDetails
-                      movie={movie}
-                      isRow={false}
-                      shouldShowOverview={false}
-                      shouldShowTitle
-                      customContainerStyle={[
-                        styles.customMovieDetailsContainer,
-                        isSelected && styles.selectedSearchResultOutline,
-                      ]}
-                      customImageStyle={styles.customMovieImage}
-                    />
-                    {isSelected && (
-                      <View style={styles.checkmarkOverlay}>
-                        <View style={styles.checkmarkCircle}>
-                          <MaterialIcons name="check" size={24} color="#FFFFFF" />
-                        </View>
-                      </View>
-                    )}
-                  </View>
-                </Pressable>
-              );
-            }}
-            keyExtractor={(movie) => movie.id.toString()}
-          />
-        </View>
+        <MovieSearch
+          selectedMovies={selectedMovies}
+          onMovieSelect={handleMovieSelection}
+          onClearSelection={clearSelection}
+          maxSelection={MAX_MOVIES_SELECTION}
+          showCounter={true}
+          showClearButton={true}
+        />
       )}
 
       <View style={styles.buttonContainer}>

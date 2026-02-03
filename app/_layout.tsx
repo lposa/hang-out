@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import 'react-native-reanimated';
 
 import { ScrollProvider } from '@/context/ScrollContext';
+import { ToastProvider } from '@/context/ToastContext';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { supabase } from '@/services/Supabase';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -75,41 +76,43 @@ export default function RootLayout() {
   };
 
   return (
-    <ScrollProvider>
-      <ThemeProvider value={transparentTheme}>
-        <LinearGradient
-          colors={['#F9FBFF', '#EEF3FF']}
-          start={[0, 0]}
-          end={[0, 1]}
-          style={{ flex: 1 }}
-        >
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              contentStyle: { backgroundColor: 'transparent' },
-            }}
-            initialRouteName="(auth)"
+    <ToastProvider>
+      <ScrollProvider>
+        <ThemeProvider value={transparentTheme}>
+          <LinearGradient
+            colors={['#F9FBFF', '#EEF3FF']}
+            start={[0, 0]}
+            end={[0, 1]}
+            style={{ flex: 1 }}
           >
-            <Stack.Screen
-              name="(auth)"
-              options={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' } }}
-            />
-            <Stack.Screen
-              name="(tabs)"
-              options={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' } }}
-            />
-            <Stack.Screen
-              name="modal"
-              options={{
-                presentation: 'modal',
-                title: 'Modal',
+            <Stack
+              screenOptions={{
+                headerShown: false,
                 contentStyle: { backgroundColor: 'transparent' },
               }}
-            />
-          </Stack>
-          <StatusBar style="auto" />
-        </LinearGradient>
-      </ThemeProvider>
-    </ScrollProvider>
+              initialRouteName="(auth)"
+            >
+              <Stack.Screen
+                name="(auth)"
+                options={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' } }}
+              />
+              <Stack.Screen
+                name="(tabs)"
+                options={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' } }}
+              />
+              <Stack.Screen
+                name="modal"
+                options={{
+                  presentation: 'modal',
+                  title: 'Modal',
+                  contentStyle: { backgroundColor: 'transparent' },
+                }}
+              />
+            </Stack>
+            <StatusBar style="auto" />
+          </LinearGradient>
+        </ThemeProvider>
+      </ScrollProvider>
+    </ToastProvider>
   );
 }

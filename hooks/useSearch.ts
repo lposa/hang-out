@@ -27,13 +27,14 @@ export const useSearch = () => {
 
     debounceRef.current = setTimeout(async () => {
       if (movieName.trim().length === 0) {
+        setMovieResults([]);
         return;
       }
 
       const movies = await movieDB.getMoviesByName(movieName);
 
       if (!movies || movies.results.length === 0) {
-        console.error('No movies found');
+        setMovieResults([]);
         return;
       }
 

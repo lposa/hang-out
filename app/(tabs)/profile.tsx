@@ -2,18 +2,13 @@ import { ProfileDisplay } from '@/components/ProfileDisplay';
 
 import { FORM_MODES, ProfileForm } from '@/components/ProfileForm/ProfileForm';
 import { LoaderSpinner } from '@/components/elements/LoaderSpinner';
+import { SCREEN_MODE_ENUM } from '@/constants';
 import { useProfile } from '@/hooks';
 import { useHeaderHeight } from '@react-navigation/elements';
 
+import { EditCardsForm } from '@/components/EditCardsForm';
 import { useState } from 'react';
 import { ScrollView } from 'react-native';
-import { EditCardsForm } from '@/components/EditCardsForm';
-
-export enum SCREEN_MODE_ENUM {
-  DISPLAY = 'display',
-  EDIT = 'edit',
-  EDIT_PICK = 'editPicks',
-}
 
 export default function ProfileScreen() {
   const headerHeight = useHeaderHeight();

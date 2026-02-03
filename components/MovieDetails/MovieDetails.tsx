@@ -1,11 +1,12 @@
 import PLACEHOLDER_IMAGE from '@/assets/images/general-placeholder.png';
-import { MappedMovie } from '@/types';
-import { ImageStyle } from 'expo-image';
-import { Image, StyleProp, Text, View, ViewStyle } from 'react-native';
-import { styles } from './MovieDetails.styles';
 import { GenreTag } from '@/components/elements';
+import { MappedMovie } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { ImageStyle } from 'expo-image';
+import { useEffect, useRef, useState } from 'react';
+import { Animated, Image, StyleProp, Text, View, ViewStyle } from 'react-native';
+import { styles } from './MovieDetails.styles';
 
 interface IMovieDetailsProps {
   movie: MappedMovie | undefined | null;
@@ -36,6 +37,41 @@ export const MovieDetails = ({
   customImageStyle,
   isEditMode = false,
 }: IMovieDetailsProps) => {
+  const [isLoadingImage, setIsLoadingImage] = useState(true);
+  const shimmerAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (movie) {
+      setIsLoadingImage(true);
+    }
+  }, [movie?.id]);
+
+  useEffect(() => {
+    if (isLoadingImage) {
+      shimmerAnim.setValue(0);
+      const animation = Animated.loop(
+        Animated.sequence([
+          Animated.timing(shimmerAnim, {
+            toValue: 1,
+            duration: 1200,
+            useNativeDriver: true,
+          }),
+          Animated.timing(shimmerAnim, {
+            toValue: 0,
+            duration: 1200,
+            useNativeDriver: true,
+          }),
+        ])
+      );
+      animation.start();
+      return () => {
+        animation.stop();
+      };
+    } else {
+      shimmerAnim.setValue(0);
+    }
+  }, [isLoadingImage, shimmerAnim]);
+
   if (!movie) {
     return null;
   }
@@ -44,6 +80,11 @@ export const MovieDetails = ({
   const year = movie.releaseDate ? movie.releaseDate.split('-')[0] : null;
   const runtime = formatRuntime(movie.runtime);
   const primaryGenre = movie.genre && movie.genre.length > 0 ? movie.genre[0] : null;
+
+  const shimmerOpacity = shimmerAnim.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [0.3, 1, 0.3],
+  });
 
   return (
     <View
@@ -65,11 +106,29 @@ export const MovieDetails = ({
           <MaterialIcons name="delete" size={24} color="#FFF" />
         </View>
       )}
-      <Image
-        source={imageSource}
-        style={[styles.movieDetailsPoster, customImageStyle]}
-        resizeMode="cover"
-      />
+
+      <View style={styles.imageContainer}>
+        {isLoadingImage && (
+          <Animated.View
+            style={[
+              styles.movieDetailsPoster,
+              styles.skeleton,
+              customImageStyle,
+              { opacity: shimmerOpacity },
+            ]}
+          />
+        )}
+        <Image
+          source={imageSource}
+          style={[
+            styles.movieDetailsPoster,
+            customImageStyle,
+            isLoadingImage && styles.imageLoading,
+          ]}
+          resizeMode="cover"
+          onLoadEnd={() => setIsLoadingImage(false)}
+        />
+      </View>
       {shouldShowTitle && (
         <View style={styles.movieInfoSection}>
           <Text style={styles.movieTitle} numberOfLines={2} ellipsizeMode="tail">
