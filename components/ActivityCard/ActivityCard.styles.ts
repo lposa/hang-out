@@ -4,7 +4,6 @@ export const styles = StyleSheet.create({
   activityContainer: {
     marginBottom: 30,
     marginTop: 100,
-    marginHorizontal: 20,
   },
 
   profilePicContainer: {

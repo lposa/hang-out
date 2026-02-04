@@ -44,7 +44,7 @@ export const MovieDetails = ({
     if (movie) {
       setIsLoadingImage(true);
     }
-  }, [movie?.id]);
+  }, [movie, movie?.id]);
 
   useEffect(() => {
     if (isLoadingImage) {

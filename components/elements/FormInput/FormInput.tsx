@@ -52,14 +52,10 @@ export const FormInput = <TFieldValues extends FieldValues>({
       rules={rules}
       render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
         <TextInput
-          style={[
-            styles.input,
-            error && styles.inputError,
-            customStyle,
-          ]}
+          style={[styles.input, error && styles.inputError, customStyle]}
           onBlur={onBlur}
           onChangeText={onChange}
-          value={value}
+          value={value === undefined || value === null ? '' : String(value)}
           placeholder={placeholder}
           keyboardType={keyboardType}
           secureTextEntry={secureTextEntry}

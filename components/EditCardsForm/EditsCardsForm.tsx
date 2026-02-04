@@ -1,7 +1,7 @@
 import { Pressable, View, Text } from 'react-native';
 import { MappedMovie } from '@/types';
 import { MovieHorizontalList } from '@/components/HorizontalList/MovieHorizontalList';
-import { TABLE_ENUM } from '@/constants';
+import { TAB_ENUM, TABLE_ENUM } from '@/constants';
 import { supabase } from '@/services/Supabase';
 import { useState } from 'react';
 import { styles } from './EditCardsForm.styles';
@@ -9,16 +9,12 @@ import { useToast } from '@/context/ToastContext';
 import { MovieSearch } from '@/components/Search';
 import { useMovieSelection } from '@/hooks/useMovieSelection';
 import { GradientButton } from '@/components/elements';
+import { TabMenu } from '@/components/TabMenu';
 
 interface IEditCardsFormProps {
   data: MappedMovie[];
   userId: string;
   onDone: () => void;
-}
-
-enum TAB_ENUM {
-  SEARCH = 'search',
-  EDIT = 'edit',
 }
 
 export const EditCardsForm = ({ data, userId, onDone }: IEditCardsFormProps) => {
@@ -90,24 +86,11 @@ export const EditCardsForm = ({ data, userId, onDone }: IEditCardsFormProps) => 
 
   return (
     <View style={styles.formContainer}>
-      <View style={styles.tabsContainer}>
-        <Pressable
-          style={[styles.tabButton, activeTab === TAB_ENUM.EDIT && styles.tabButtonActive]}
-          onPress={() => setActiveTab(TAB_ENUM.EDIT)}
-        >
-          <Text style={[styles.tabText, activeTab === TAB_ENUM.EDIT && styles.tabTextActive]}>
-            Edit
-          </Text>
-        </Pressable>
-        <Pressable
-          style={[styles.tabButton, activeTab === TAB_ENUM.SEARCH && styles.tabButtonActive]}
-          onPress={() => setActiveTab(TAB_ENUM.SEARCH)}
-        >
-          <Text style={[styles.tabText, activeTab === TAB_ENUM.SEARCH && styles.tabTextActive]}>
-            Search
-          </Text>
-        </Pressable>
-      </View>
+      <TabMenu
+        activeTab={activeTab}
+        handleActiveTabPress={(tab) => setActiveTab(tab)}
+        tabGroups={[TAB_ENUM.EDIT, TAB_ENUM.SEARCH]}
+      />
 
       {activeTab === TAB_ENUM.SEARCH && (
         <MovieSearch
