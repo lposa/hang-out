@@ -24,34 +24,67 @@ export default function RootLayout() {
   const segments = useSegments();
   const router = useRouter();
 
-  const [fontsLoaded] = useFonts({
+  const [fontsLoaded, fontError] = useFonts({
     Pacifico: require('@/assets/Pacifico-Regular.ttf'),
   });
 
+  // If fonts fail to load, we'll proceed anyway
+  const fontsReady = fontsLoaded || fontError !== null;
+
   useEffect(() => {
     const checkAuth = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      setIsAuthenticated(!!session);
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        setIsAuthenticated(!!session);
+      } catch (error) {
+        console.error('Error checking auth:', error);
+        // Default to unauthenticated if there's an error
+        setIsAuthenticated(false);
+      }
     };
 
     checkAuth();
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsAuthenticated(!!session);
-    });
+    let subscription: { unsubscribe: () => void } | null = null;
+    try {
+      const {
+        data: { subscription: authSubscription },
+      } = supabase.auth.onAuthStateChange((_event, session) => {
+        setIsAuthenticated(!!session);
+      });
+      subscription = authSubscription;
+    } catch (error) {
+      console.error('Error setting up auth listener:', error);
+      setIsAuthenticated(false);
+    }
 
-    return () => subscription.unsubscribe();
+    return () => {
+      if (subscription) {
+        subscription.unsubscribe();
+      }
+    };
   }, []);
 
   useEffect(() => {
-    if (fontsLoaded && isAuthenticated !== undefined) {
+    // Add a timeout fallback to ensure splash screen doesn't stay forever
+    const timeout = setTimeout(() => {
+      if (isAuthenticated === undefined) {
+        console.warn('Auth check timed out, defaulting to unauthenticated');
+        setIsAuthenticated(false);
+      }
+      // Hide splash screen after timeout regardless
+      SplashScreen.hideAsync();
+    }, 5000); // 5 second timeout
+
+    if (fontsReady && isAuthenticated !== undefined) {
+      clearTimeout(timeout);
       SplashScreen.hideAsync();
     }
-  }, [fontsLoaded, isAuthenticated]);
+
+    return () => clearTimeout(timeout);
+  }, [fontsReady, isAuthenticated]);
 
   useEffect(() => {
     if (isAuthenticated === undefined) return;

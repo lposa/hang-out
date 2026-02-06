@@ -3,8 +3,8 @@ import React from 'react';
 import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
 import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Header } from '@/components/Navigation/Header';
+import { IconSymbol } from '@/components/ui/icon-symbol';
 
 const TAB_WIDTH = 200;
 

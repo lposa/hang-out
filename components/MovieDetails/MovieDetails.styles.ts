@@ -14,6 +14,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-start',
     minWidth: 0,
+    height: 200,
   },
   movieDetailsTitle: {
     fontSize: 18,
@@ -26,7 +27,6 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     lineHeight: 20,
-    flexShrink: 1,
   },
 
   movieTitle: {
@@ -99,7 +99,7 @@ export const styles = StyleSheet.create({
   skeleton: {
     position: 'absolute',
     backgroundColor: '#D1D5DB',
-    zIndex: 1,
+    zIndex: 2,
     top: 0,
     left: 0,
     right: 0,

@@ -3,7 +3,6 @@ import { StyleSheet } from 'react-native';
 export const styles = StyleSheet.create({
   activityContainer: {
     marginBottom: 30,
-    marginTop: 100,
   },
 
   profilePicContainer: {
@@ -32,7 +31,7 @@ export const styles = StyleSheet.create({
     backgroundColor: 'whitesmoke',
     borderRadius: 20,
     paddingHorizontal: 20,
-    paddingTop: 85,
+
     paddingBottom: 20,
     shadowColor: '#82D0EE',
     shadowOffset: { width: 5, height: 5 },

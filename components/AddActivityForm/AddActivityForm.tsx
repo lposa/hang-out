@@ -19,7 +19,7 @@ type ActivityFormData = {
   lastName: string;
   activityType: ACTIVITY_TYPES_ENUM;
   activityName: string;
-  activityData: MappedMovie[] | string[];
+  activityData: MappedMovie | null;
   date: string;
   time: string;
   place: string;
@@ -54,7 +54,7 @@ export const AddActivityForm = ({ onSubmitCallback }: IAddActivityForm) => {
     mode: 'onTouched',
     defaultValues: {
       activityType: undefined,
-      activityData: [],
+      activityData: null,
       date: '',
       time: '',
       place: '',
@@ -63,7 +63,7 @@ export const AddActivityForm = ({ onSubmitCallback }: IAddActivityForm) => {
   });
 
   useEffect(() => {
-    setValue('activityData', selectedMovies);
+    setValue('activityData', selectedMovies[0] ?? null);
   }, [selectedMovies, setValue]);
 
   const onSubmit = async (formData: ActivityFormData) => {
@@ -84,7 +84,7 @@ export const AddActivityForm = ({ onSubmitCallback }: IAddActivityForm) => {
       last_name: metadata.last_name ?? '',
       email: user.email,
       activity_type: formData.activityType,
-      activity_data: selectedMovies,
+      activity_data: selectedMovies[0] ?? null,
       date: formData.date,
       time: formData.time,
       place: formData.place,
@@ -97,11 +97,11 @@ export const AddActivityForm = ({ onSubmitCallback }: IAddActivityForm) => {
 
     if (error) {
       showToast(error.message || 'Failed to save profile', 'error');
+      console.log(error);
     } else {
       showToast('Activity added!', 'success');
-      setTimeout(() => {
-        onSubmitCallback && onSubmitCallback();
-      }, 1500);
+
+      onSubmitCallback && onSubmitCallback();
     }
   };
 
@@ -116,7 +116,7 @@ export const AddActivityForm = ({ onSubmitCallback }: IAddActivityForm) => {
         maxSelection={MAX_MOVIES_SELECTION}
       />
 
-      <DatePickerInput control={control} name="date" placeholder="Date" />
+      <DatePickerInput control={control} name="date" placeholder="Date" minimumDate={new Date()} />
 
       <FormInput control={control} name="time" placeholder="Time" />
       <FormInput control={control} name="place" placeholder="Place" />

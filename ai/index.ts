@@ -1,0 +1,1 @@
+export { analyzeMatch } from './analyzeMatch';

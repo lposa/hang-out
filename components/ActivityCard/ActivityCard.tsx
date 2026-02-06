@@ -1,87 +1,83 @@
-import { View, Image, ImageSourcePropType, Text, Pressable } from 'react-native';
-import { styles } from './ActivityCard.styles';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
-import { ACTIVITY_TYPES_ENUM } from '@/constants/activity-types';
 import { ActivityPosterDetails } from '@/components/ActivityPosterDetails/ActivityPosterDetails';
 import { MovieDetails } from '@/components/MovieDetails/MovieDetails';
-import { useMovieDb } from '@/hooks/useMovieDb';
 import { GradientButton } from '@/components/elements';
-
-export type ActivityPoster = {
-  name: string;
-  reviewScore: number;
-  profilePic: ImageSourcePropType | undefined;
-};
-
-type Details = {
-  time: string;
-  price?: number;
-  place: string;
-  date: string;
-  match?: number;
-};
+import { Activity } from '@/types';
+import { Ionicons } from '@expo/vector-icons';
+import { Image, Text, View } from 'react-native';
+import { styles } from './ActivityCard.styles';
 
 interface IActivityCardProps {
-  activityName: string;
-  activityPoster: ActivityPoster;
-  activityDescription: string;
-  activityType: ACTIVITY_TYPES_ENUM;
-  details: Details;
+  activityData: Activity;
+  isCurrentUserActivity?: boolean;
 }
 
 export const ActivityCard = ({
-  activityName,
-  activityPoster,
-  activityDescription,
-  activityType,
-  details,
+  activityData,
+  isCurrentUserActivity = false,
 }: IActivityCardProps) => {
-  const { movie } = useMovieDb({ movieName: activityName });
+  const { user_id, first_name, last_name, activity_type, activity_data, date, time, place, price } =
+    activityData;
 
   return (
-    <View style={styles.activityContainer}>
-      <View style={styles.profilePicContainer}>
-        <Image source={activityPoster.profilePic} style={styles.profilePic} />
-      </View>
+    <View
+      style={[
+        styles.activityContainer,
+        isCurrentUserActivity ? { marginTop: 20 } : { marginTop: 100 },
+      ]}
+    >
+      {!isCurrentUserActivity && (
+        <>
+          <View style={styles.profilePicContainer}>
+            <Image
+              source={require('@/assets/images/leonard_posa.jpeg')}
+              style={styles.profilePic}
+            />
+          </View>
 
-      <ActivityPosterDetails
-        name={activityPoster.name}
-        reviewScore={activityPoster.reviewScore}
-        match={details.match}
-      />
+          <ActivityPosterDetails
+            name={`${first_name} ${last_name}`}
+            reviewScore={5}
+            userId={user_id}
+          />
+        </>
+      )}
 
-      <View style={styles.activityInformationContainer}>
+      <View
+        style={[
+          styles.activityInformationContainer,
+          isCurrentUserActivity ? { paddingTop: 20 } : { paddingTop: 85 },
+        ]}
+      >
         <View style={styles.activityHeader}>
           <Text style={styles.activityTitle} numberOfLines={2} ellipsizeMode="tail">
-            {activityName}
+            {activity_data?.title}
           </Text>
         </View>
 
         <View style={styles.contentSection}>
-          <MovieDetails movie={movie} />
+          <MovieDetails movie={activity_data} />
           <View style={styles.detailsContainer}>
             <View style={styles.detailRow}>
               <Ionicons name="calendar-outline" size={18} color="#666" />
-              <Text style={styles.detailText}>{details.date}</Text>
+              <Text style={styles.detailText}>{date}</Text>
             </View>
             <View style={styles.detailRow}>
               <Ionicons name="location-outline" size={18} color="#666" />
-              <Text style={styles.detailText}>{details.place}</Text>
+              <Text style={styles.detailText}>{place}</Text>
             </View>
-            {details.price && (
+            {price && (
               <View style={styles.detailRow}>
                 <Ionicons name="cash-outline" size={18} color="#666" />
-                <Text style={styles.detailText}>{details.price} RSD</Text>
+                <Text style={styles.detailText}>{price} RSD</Text>
               </View>
             )}
             <View style={styles.detailRow}>
               <Ionicons name="time-outline" size={18} color="#666" />
-              <Text style={styles.detailText}>{details.time}</Text>
+              <Text style={styles.detailText}>{time}</Text>
             </View>
           </View>
         </View>
-        <GradientButton text="Join Activity" />
+        {!isCurrentUserActivity && <GradientButton text="Join Activity" />}
       </View>
     </View>
   );

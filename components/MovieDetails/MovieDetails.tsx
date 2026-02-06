@@ -41,12 +41,6 @@ export const MovieDetails = ({
   const shimmerAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    if (movie) {
-      setIsLoadingImage(true);
-    }
-  }, [movie, movie?.id]);
-
-  useEffect(() => {
     if (isLoadingImage) {
       shimmerAnim.setValue(0);
       const animation = Animated.loop(
@@ -107,27 +101,25 @@ export const MovieDetails = ({
         </View>
       )}
 
-      <View style={styles.imageContainer}>
-        {isLoadingImage && (
-          <Animated.View
-            style={[
-              styles.movieDetailsPoster,
-              styles.skeleton,
-              customImageStyle,
-              { opacity: shimmerOpacity },
-            ]}
-          />
-        )}
+      <View style={[styles.imageContainer, customImageStyle && { width: '100%' }]}>
         <Image
           source={imageSource}
-          style={[
-            styles.movieDetailsPoster,
-            customImageStyle,
-            isLoadingImage && styles.imageLoading,
-          ]}
+          style={[styles.movieDetailsPoster, customImageStyle]}
           resizeMode="cover"
-          onLoadEnd={() => setIsLoadingImage(false)}
+          onLoadStart={() => {
+            setIsLoadingImage(true);
+          }}
+          onLoadEnd={() => {
+            setIsLoadingImage(false);
+          }}
+          onError={(error) => {
+            setIsLoadingImage(false);
+            console.warn('Image load error:', error.nativeEvent?.error || error);
+          }}
         />
+        {isLoadingImage && (
+          <Animated.View style={[styles.skeleton, customImageStyle, { opacity: shimmerOpacity }]} />
+        )}
       </View>
       {shouldShowTitle && (
         <View style={styles.movieInfoSection}>
@@ -154,7 +146,9 @@ export const MovieDetails = ({
       )}
       {shouldShowOverview && (
         <View style={styles.movieDetailsTextContainer}>
-          <Text style={styles.movieDetailsOverview}>{movie.overview}</Text>
+          <Text style={styles.movieDetailsOverview} numberOfLines={10}>
+            {movie.overview}
+          </Text>
         </View>
       )}
     </View>
