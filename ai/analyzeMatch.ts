@@ -16,6 +16,12 @@ export async function analyzeMatch(
   userAMovies: ProfileTopTenMoviesRow,
   userBMovies: ProfileTopTenMoviesRow
 ) {
+  console.log(
+    'Analyzing match between users:',
+    userAMovies.top_ten_movies,
+    userBMovies.top_ten_movies
+  );
+
   try {
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',

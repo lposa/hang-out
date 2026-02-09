@@ -56,4 +56,25 @@ export const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 12,
   },
+  calculateButton: {
+    backgroundColor: '#8B5CF6',
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  calculateButtonDisabled: {
+    opacity: 0.7,
+  },
+  calculateButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  calculateButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '600',
+    fontSize: 13,
+  },
 });

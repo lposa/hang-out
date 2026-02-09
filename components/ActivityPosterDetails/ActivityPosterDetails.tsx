@@ -7,6 +7,7 @@ import { analyzeMatch } from '@/ai';
 import { supabase } from '@/services/Supabase';
 import { TABLE_ENUM } from '@/constants';
 import { Ionicons } from '@expo/vector-icons';
+import { LoaderSpinner } from '@/components/elements/LoaderSpinner';
 
 interface IActivityPosterProps {
   name: string;
@@ -133,8 +134,22 @@ export const ActivityPosterDetails = ({
             <ProgressBar match={matchScore} />
           </>
         ) : (
-          <Pressable onPress={calculateUserMatch} disabled={loading}>
-            <Text>{loading ? 'Calculating...' : 'Calculate match'}</Text>
+          <Pressable
+            style={[styles.calculateButton, loading && styles.calculateButtonDisabled]}
+            onPress={calculateUserMatch}
+            disabled={loading}
+          >
+            {loading ? (
+              <View style={styles.calculateButtonContent}>
+                <LoaderSpinner size={14} color="#FFFFFF" />
+                <Text style={styles.calculateButtonText}>Calculating...</Text>
+              </View>
+            ) : (
+              <View style={styles.calculateButtonContent}>
+                <Ionicons name="heart-outline" size={14} color="#FFFFFF" />
+                <Text style={styles.calculateButtonText}>Calculate match</Text>
+              </View>
+            )}
           </Pressable>
         )}
       </View>
