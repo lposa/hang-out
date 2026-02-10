@@ -68,19 +68,17 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
-    // Add a timeout fallback to ensure splash screen doesn't stay forever
     const timeout = setTimeout(() => {
       if (isAuthenticated === undefined) {
         console.warn('Auth check timed out, defaulting to unauthenticated');
         setIsAuthenticated(false);
       }
-      // Hide splash screen after timeout regardless
-      SplashScreen.hideAsync();
-    }, 5000); // 5 second timeout
+      SplashScreen.hideAsync().catch(() => {});
+    }, 5000);
 
     if (fontsReady && isAuthenticated !== undefined) {
       clearTimeout(timeout);
-      SplashScreen.hideAsync();
+      SplashScreen.hideAsync().catch(() => {});
     }
 
     return () => clearTimeout(timeout);
@@ -138,6 +136,14 @@ export default function RootLayout() {
                 options={{
                   presentation: 'modal',
                   title: 'Modal',
+                  contentStyle: { backgroundColor: 'transparent' },
+                }}
+              />
+              <Stack.Screen
+                name="(profile)/profile-screen/[id]"
+                options={{
+                  presentation: 'modal',
+                  headerShown: false,
                   contentStyle: { backgroundColor: 'transparent' },
                 }}
               />

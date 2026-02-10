@@ -1,11 +1,13 @@
-import { useEffect, useState } from 'react';
-import { MappedMovie, Profile } from '@/types';
-import { supabase } from '@/services/Supabase';
 import { TABLE_ENUM } from '@/constants';
+import { supabase } from '@/services/Supabase';
+import { MappedMovie, Profile } from '@/types';
+import { useEffect, useState } from 'react';
 
 export type ProfileTopTenMoviesRow = {
   top_ten_movies: MappedMovie[];
 };
+
+type ProfileDataType = '*' | 'top_ten_movies';
 
 export const useProfile = () => {
   const [profile, setProfile] = useState<Profile>();
@@ -76,7 +78,10 @@ export const useProfile = () => {
     }
   };
 
-  const getUserById = async (userId: string): Promise<ProfileTopTenMoviesRow | undefined> => {
+  const getUserDataById = async (
+    userId: string,
+    dataType: ProfileDataType = '*'
+  ): Promise<ProfileTopTenMoviesRow | Profile | undefined> => {
     if (!userId) {
       console.error('No user id is provided');
       return;
@@ -85,7 +90,7 @@ export const useProfile = () => {
     try {
       const { data, error } = await supabase
         .from(TABLE_ENUM.PROFILES)
-        .select('top_ten_movies')
+        .select(dataType)
         .eq('id', userId)
         .single();
 
@@ -106,6 +111,6 @@ export const useProfile = () => {
     profile,
     refetch: getProfileFromDB,
     getTopTenMovies,
-    getUserById,
+    getUserDataById,
   };
 };

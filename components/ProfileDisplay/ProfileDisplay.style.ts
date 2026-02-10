@@ -13,7 +13,6 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 16,
   },
   sectionTitle: {
     fontSize: 18,

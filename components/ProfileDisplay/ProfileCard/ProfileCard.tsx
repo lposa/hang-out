@@ -30,11 +30,13 @@ export const ProfileCard = ({ name, birthday, imageSrc, onEdit }: IProfileCard) 
           </View>
         </View>
 
-        <View style={styles.controlCenter}>
-          <Pressable style={styles.controlButton} onPress={onEdit}>
-            <Text>Update profile</Text>
-          </Pressable>
-        </View>
+        {onEdit && (
+          <View style={styles.controlCenter}>
+            <Pressable style={styles.controlButton} onPress={onEdit}>
+              <Text>Update profile</Text>
+            </Pressable>
+          </View>
+        )}
       </View>
     </View>
   );

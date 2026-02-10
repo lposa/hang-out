@@ -3,4 +3,6 @@ export enum TAB_ENUM {
   EDIT = 'Edit',
   ALL = 'All',
   MY_ACTIVITIES = 'My activities',
+  PROFILE = 'Profile',
+  AI_ANALYSIS = 'AI Analysis',
 }

@@ -8,6 +8,7 @@ import { supabase } from '@/services/Supabase';
 import { TABLE_ENUM } from '@/constants';
 import { Ionicons } from '@expo/vector-icons';
 import { LoaderSpinner } from '@/components/elements/LoaderSpinner';
+import { ProfileTopTenMoviesRow } from '@/hooks/useProfile';
 
 interface IActivityPosterProps {
   name: string;
@@ -37,7 +38,7 @@ export const ActivityPosterDetails = ({
   userId,
   category = 'movies',
 }: IActivityPosterProps) => {
-  const { getTopTenMovies, getUserById } = useProfile();
+  const { getTopTenMovies, getUserDataById } = useProfile();
   const [matchScore, setMatchScore] = useState<number | undefined>(undefined);
   const [loading, setLoading] = useState(false);
 
@@ -77,12 +78,15 @@ export const ActivityPosterDetails = ({
       if (category === 'movies') {
         const [currentUserMovies, activityPosterMovies] = await Promise.all([
           getTopTenMovies(),
-          getUserById(userId),
+          getUserDataById(userId, 'top_ten_movies'),
         ]);
 
         if (!currentUserMovies || !activityPosterMovies) return;
 
-        const { result } = await analyzeMatch(currentUserMovies, activityPosterMovies);
+        const { result } = await analyzeMatch(
+          currentUserMovies,
+          activityPosterMovies as ProfileTopTenMoviesRow
+        );
         aiResult = result;
       }
       //TODO: add more categories when needed

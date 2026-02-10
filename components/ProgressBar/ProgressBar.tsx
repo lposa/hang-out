@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 import { styles } from './ProgressBar.styles';
 
-const getColorForPercentage = (percent: number): string => {
+export const getColorForPercentage = (percent: number): string => {
   if (percent <= 10) return '#FF0000';
   if (percent <= 20) return '#FF4500';
   if (percent <= 30) return '#FF8C00';

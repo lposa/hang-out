@@ -3,6 +3,7 @@ import { StyleSheet } from 'react-native';
 export const styles = StyleSheet.create({
   movieCard: {
     marginRight: 12,
+    marginTop: 20,
     position: 'relative',
   },
   movieCardContainer: {

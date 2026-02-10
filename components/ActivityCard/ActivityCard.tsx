@@ -3,8 +3,9 @@ import { MovieDetails } from '@/components/MovieDetails/MovieDetails';
 import { GradientButton } from '@/components/elements';
 import { Activity } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
-import { Image, Text, View } from 'react-native';
+import { Image, Pressable, Text, View } from 'react-native';
 import { styles } from './ActivityCard.styles';
+import { Href, router } from 'expo-router';
 
 interface IActivityCardProps {
   activityData: Activity;
@@ -18,6 +19,10 @@ export const ActivityCard = ({
   const { user_id, first_name, last_name, activity_type, activity_data, date, time, place, price } =
     activityData;
 
+  const handleOpenProfile = () => {
+    router.push(`/(profile)/profile-screen/${user_id}` as Href);
+  };
+
   return (
     <View
       style={[
@@ -27,12 +32,12 @@ export const ActivityCard = ({
     >
       {!isCurrentUserActivity && (
         <>
-          <View style={styles.profilePicContainer}>
+          <Pressable style={styles.profilePicContainer} onPress={handleOpenProfile}>
             <Image
               source={require('@/assets/images/leonard_posa.jpeg')}
               style={styles.profilePic}
             />
-          </View>
+          </Pressable>
 
           <ActivityPosterDetails
             name={`${first_name} ${last_name}`}
