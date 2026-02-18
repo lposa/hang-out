@@ -1,6 +1,6 @@
 import { styles } from './GradientButton.styles';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Pressable, Text } from 'react-native';
+import { Pressable, StyleProp, Text, ViewStyle } from 'react-native';
 import { LoaderSpinner } from '@/components/elements/LoaderSpinner';
 
 interface IGradientButtonProps {
@@ -8,12 +8,23 @@ interface IGradientButtonProps {
   text: string;
   onPress?: () => void;
   loading?: boolean;
+  customButtonStyle?: StyleProp<ViewStyle>;
 }
 
-export const GradientButton = ({ disabled, text, onPress, loading }: IGradientButtonProps) => {
+export const GradientButton = ({
+  disabled,
+  text,
+  onPress,
+  loading,
+  customButtonStyle,
+}: IGradientButtonProps) => {
   return (
     <Pressable
-      style={[styles.actionButton, disabled && { opacity: 0.5 }]}
+      style={[
+        styles.actionButton,
+        disabled && { opacity: 0.5 },
+        customButtonStyle && customButtonStyle,
+      ]}
       disabled={disabled}
       onPress={onPress}
     >

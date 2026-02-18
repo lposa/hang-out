@@ -6,6 +6,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image, Pressable, Text, View } from 'react-native';
 import { styles } from './ActivityCard.styles';
 import { Href, router } from 'expo-router';
+import { ACTIVITY_STATUS_ENUM } from './types';
+import { useActivity } from '@/components/ActivityCard/hooks/useActivity';
+import { AcceptedRequests, PendingRequests } from '@/components/ActivityCard/components';
 
 interface IActivityCardProps {
   activityData: Activity;
@@ -16,11 +19,28 @@ export const ActivityCard = ({
   activityData,
   isCurrentUserActivity = false,
 }: IActivityCardProps) => {
-  const { user_id, first_name, last_name, activity_type, activity_data, date, time, place, price } =
-    activityData;
+  const {
+    id: activityId,
+    user_id: hostUserId,
+    first_name,
+    last_name,
+    activity_data: activityDetails,
+    date,
+    time,
+    place,
+    price,
+  } = activityData;
 
-  const handleOpenProfile = () => {
-    router.push(`/(profile)/profile-screen/${user_id}` as Href);
+  const {
+    pendingRequests,
+    acceptedParticipants,
+    currentUserParticipationStatus,
+    handleJoinActivity,
+    handleMangeRequestStatus,
+  } = useActivity({ isCurrentUserActivity, activityId });
+
+  const handleOpenProfile = (profileId: string) => {
+    router.push(`/(profile)/profile-screen/${profileId}` as Href);
   };
 
   return (
@@ -32,7 +52,10 @@ export const ActivityCard = ({
     >
       {!isCurrentUserActivity && (
         <>
-          <Pressable style={styles.profilePicContainer} onPress={handleOpenProfile}>
+          <Pressable
+            style={styles.profilePicContainer}
+            onPress={() => handleOpenProfile(hostUserId)}
+          >
             <Image
               source={require('@/assets/images/leonard_posa.jpeg')}
               style={styles.profilePic}
@@ -42,7 +65,7 @@ export const ActivityCard = ({
           <ActivityPosterDetails
             name={`${first_name} ${last_name}`}
             reviewScore={5}
-            userId={user_id}
+            userId={hostUserId}
           />
         </>
       )}
@@ -55,12 +78,12 @@ export const ActivityCard = ({
       >
         <View style={styles.activityHeader}>
           <Text style={styles.activityTitle} numberOfLines={2} ellipsizeMode="tail">
-            {activity_data?.title}
+            {activityDetails?.title}
           </Text>
         </View>
 
         <View style={styles.contentSection}>
-          <MovieDetails movie={activity_data} />
+          <MovieDetails movie={activityDetails} />
           <View style={styles.detailsContainer}>
             <View style={styles.detailRow}>
               <Ionicons name="calendar-outline" size={18} color="#666" />
@@ -82,7 +105,48 @@ export const ActivityCard = ({
             </View>
           </View>
         </View>
-        {!isCurrentUserActivity && <GradientButton text="Join Activity" />}
+
+        {!isCurrentUserActivity && (
+          <>
+            {currentUserParticipationStatus === 'none' && (
+              <GradientButton text="Join Activity" onPress={handleJoinActivity} />
+            )}
+            {currentUserParticipationStatus === ACTIVITY_STATUS_ENUM.PENDING && (
+              <Text style={styles.statusText}>Request Sent. Waiting for host approval.</Text>
+            )}
+            {currentUserParticipationStatus === ACTIVITY_STATUS_ENUM.ACCEPTED && (
+              <GradientButton
+                text="View Chat"
+                onPress={() => router.push(`/(chat)/${activityId}` as Href)}
+              />
+            )}
+            {currentUserParticipationStatus === ACTIVITY_STATUS_ENUM.DECLINED && (
+              <Text style={styles.statusText}>Your request was declined.</Text>
+            )}
+          </>
+        )}
+
+        {isCurrentUserActivity && acceptedParticipants && acceptedParticipants.length > 0 && (
+          <AcceptedRequests
+            acceptedParticipants={acceptedParticipants}
+            handleOpenProfile={handleOpenProfile}
+            handleManageRequestStatus={handleMangeRequestStatus}
+            activityId={activityId}
+          />
+        )}
+
+        {isCurrentUserActivity &&
+          pendingRequests &&
+          pendingRequests?.length > 0 &&
+          acceptedParticipants &&
+          acceptedParticipants.length === 0 && (
+            <PendingRequests
+              pendingRequests={pendingRequests}
+              handleOpenProfile={handleOpenProfile}
+              activityId={activityId}
+              handleMangeRequestStatus={handleMangeRequestStatus}
+            />
+          )}
       </View>
     </View>
   );

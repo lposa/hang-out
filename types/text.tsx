@@ -1,177 +1,182 @@
-import { LinearGradient } from 'expo-linear-gradient';
-import { Pressable, StyleSheet, Text, View, Dimensions } from 'react-native'; // Import Dimensions
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
-import { ActivityCard } from '@/components/ActivityCard/ActivityCard';
-import { AddActivityForm } from '@/components/AddActivityForm';
-import { AppModal } from '@/components/Modal';
-import { TabMenu } from '@/components/TabMenu';
-import { TAB_ENUM } from '@/constants';
-import { activityService } from '@/services';
-import { Activity } from '@/types';
-import { MaterialIcons } from '@expo/vector-icons';
+import React, { useState, useCallback, useEffect } from 'react';
+import { GiftedChat, IMessage } from 'react-native-gifted-chat';
 import { useHeaderHeight } from '@react-navigation/elements';
-import { useEffect, useState, useRef } from 'react'; // Import useRef
+import { View, Text, StyleSheet, Pressable, ActivityIndicator } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import { router, useLocalSearchParams } from 'expo-router';
+import { renderBubble, renderDay, renderInputToolbar, renderSend } from '@/components/Chat';
+import { supabase } from '@/services/Supabase';
+import { TABLE_ENUM } from '@/constants';
 
-// Reanimated imports
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  useAnimatedScrollHandler,
-  runOnJS,
-} from 'react-native-reanimated';
+export default function ChatScreen() {
+  // 1. Get the activity ID from the route (e.g. pushed from ActivityCard)
+  const { activityId } = useLocalSearchParams();
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window'); // Get screen width
+  const [messages, setMessages] = useState<IMessage[]>([]);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-export default function HomeScreen() {
-  const headerHeight = useHeaderHeight();
   const insets = useSafeAreaInsets();
+  const headerHeight = useHeaderHeight();
 
-  const [activeTab, setActiveTab] = useState<TAB_ENUM>(TAB_ENUM.ALL);
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [activities, setActivities] = useState<Activity[]>([]);
-  const [userActivities, setUserActivities] = useState<Activity[]>([]);
-
-  // Reanimated Shared Values
-  const buttonTranslateX = useSharedValue(0); // 0 means fully visible, SCREEN_WIDTH means hidden
-  const isButtonHidden = useSharedValue(false); // To prevent multiple hide/show animations
-
-  const handleStickyPress = () => {
-    setIsModalVisible(true);
-  };
-
+  // 2. Fetch the Current User (to know which messages are "mine")
   useEffect(() => {
-    const fetchActivities = async () => {
-      const activities = await activityService.fetchAllActivities();
-      setActivities(activities);
+    const getUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setCurrentUserId(user?.id || null);
     };
-
-    const fetchUserActivities = async () => {
-      const userActivities = await activityService.fetchCurrentUserActivities();
-      setUserActivities(userActivities);
-    };
-
-    fetchActivities();
-    fetchUserActivities();
+    getUser();
   }, []);
 
-  const renderActivities = () => {
-    if (activities.length === 0) {
-      return <Text>No Activities Found</Text>;
-    }
+  // 3. Load Initial Messages & Subscribe to new ones
+  useEffect(() => {
+    if (!activityId) return;
 
-    return activities.map((activity) => <ActivityCard key={activity.id} activityData={activity} />);
-  };
+    // A. Function to fetch old messages
+    const fetchMessages = async () => {
+      const { data, error } = await supabase
+        .from('messages') // Use 'messages' or TABLE_ENUM.MESSAGES
+        .select(
+          `
+          id,
+          text,
+          created_at,
+          user_id,
+          user:profiles(id, first_name, last_name, avatar_url)
+        `
+        )
+        .eq('activity_id', activityId)
+        .order('created_at', { ascending: false }); // GiftedChat wants newest first (bottom to top)
 
-  const renderUserActivities = () => {
-    if (userActivities.length === 0) {
-      return <Text>You don&#39;t have any current activities</Text>;
-    }
+      if (!error && data) {
+        // Map Supabase data structure to GiftedChat IMessage structure
+        const formattedMessages: IMessage[] = data.map((msg: any) => ({
+          _id: msg.id,
+          text: msg.text,
+          createdAt: new Date(msg.created_at),
+          user: {
+            _id: msg.user_id,
+            name: msg.user?.first_name || 'User',
+            avatar: msg.user?.avatar_url || require('@/assets/images/leonard_posa.jpeg'), // Fallback image
+          },
+        }));
+        setMessages(formattedMessages);
+      }
+      setIsLoading(false);
+    };
 
-    return userActivities.map((activity) => (
-      <ActivityCard isCurrentUserActivity={true} key={activity.id} activityData={activity} />
-    ));
-  };
+    fetchMessages();
 
-  // --- Reanimated Logic ---
+    // B. Subscribe to NEW messages (Realtime)
+    const channel = supabase
+      .channel(`chat:${activityId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `activity_id=eq.${activityId}`,
+        },
+        async (payload) => {
+          // If I sent the message, GiftedChat's onSend already added it optimistically.
+          // We can skip adding it again to prevent duplicates, OR handle ID updates.
+          // For simplicity, we ignore our own realtime events here.
+          // Note: payload.new usually only has raw data, not joined profile data.
 
-  // Function to show the button (run on JS thread)
-  const showButton = () => {
-    'worklet'; // Mark as worklet to run on UI thread
-    if (isButtonHidden.value) {
-      buttonTranslateX.value = withTiming(0, { duration: 200 });
-      isButtonHidden.value = false;
-    }
-  };
+          if (payload.new.user_id === currentUserId) return;
 
-  // Function to hide the button (run on JS thread)
-  const hideButton = () => {
-    'worklet'; // Mark as worklet to run on UI thread
-    if (!isButtonHidden.value) {
-      buttonTranslateX.value = withTiming(SCREEN_WIDTH, { duration: 200 }); // Slide completely off screen
-      isButtonHidden.value = true;
-    }
-  };
+          // We need to fetch the sender's profile because Realtime payload doesn't include joins
+          const { data: senderProfile } = await supabase
+            .from('profiles') // or TABLE_ENUM.PROFILES
+            .select('first_name, avatar_url')
+            .eq('id', payload.new.user_id)
+            .single();
 
-  // Scroll handler
-  const scrollHandler = useAnimatedScrollHandler({
-    onScroll: (event) => {
-      const currentScrollY = event.contentOffset.y;
-      const SCROLL_HIDE_THRESHOLD = 50; // How much scroll down before hiding
+          const newMessage: IMessage = {
+            _id: payload.new.id,
+            text: payload.new.text,
+            createdAt: new Date(payload.new.created_at),
+            user: {
+              _id: payload.new.user_id,
+              name: senderProfile?.first_name || 'User',
+              avatar: senderProfile?.avatar_url || require('@/assets/images/leonard_posa.jpeg'),
+            },
+          };
 
-      // Hide if scrolling down past a threshold
-      if (currentScrollY > SCROLL_HIDE_THRESHOLD && !isButtonHidden.value) {
-        runOnJS(hideButton)();
-      } else if (currentScrollY <= SCROLL_HIDE_THRESHOLD && isButtonHidden.value) {
-        // Option to show when near the top again
-        runOnJS(showButton)();
+          setMessages((previousMessages) => GiftedChat.append(previousMessages, [newMessage]));
+        }
+      )
+      .subscribe();
+
+    // Clean up subscription on unmount
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [activityId, currentUserId]);
+
+  // 4. Handle Sending Messages
+  const onSend = useCallback(
+    async (newMessages: IMessage[] = []) => {
+      // A. Update UI immediately (Optimistic UI)
+      setMessages((previousMessages) => GiftedChat.append(previousMessages, newMessages));
+
+      const messageToSend = newMessages[0];
+
+      if (!currentUserId || !activityId) return;
+
+      // B. Write to Database
+      const { error } = await supabase.from('messages').insert({
+        activity_id: activityId,
+        user_id: currentUserId,
+        text: messageToSend.text,
+      });
+
+      if (error) {
+        console.error('Error sending message', error);
+        // Optional: Show error toast or remove message from state
       }
     },
-    // This fires when the user lifts their finger from scrolling
-    onEndDrag: (event) => {
-      // If momentum scrolling doesn't take over, we want to show the button
-      // We'll primarily rely on onMomentumScrollEnd but this is a fallback
-      runOnJS(showButton)();
-    },
-    // This fires when momentum scrolling has completely stopped
-    onMomentumEnd: (event) => {
-      runOnJS(showButton)();
-    },
-  });
+    [activityId, currentUserId]
+  );
 
-  // Animated style for the button
-  const animatedButtonStyles = useAnimatedStyle(() => {
-    return {
-      transform: [{ translateX: buttonTranslateX.value }],
-    };
-  });
+  // --- Render ---
+
+  if (isLoading || !currentUserId) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#FF5F6D" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      <AppModal
-        visible={isModalVisible}
-        onClose={() => setIsModalVisible(false)}
-        title="Add Activity"
-      >
-        <AddActivityForm onSubmitCallback={() => setIsModalVisible(false)} />
-      </AppModal>
-      <Animated.ScrollView // Use Animated.ScrollView
-        style={styles.scrollViewContent}
-        contentContainerStyle={{ paddingVertical: headerHeight }}
-        onScroll={scrollHandler} // Attach the scroll handler
-        scrollEventThrottle={16} // Important for smooth animation
-      >
-        <TabMenu
-          activeTab={activeTab}
-          handleActiveTabPress={(tab) => setActiveTab(tab)}
-          tabGroups={[TAB_ENUM.ALL, TAB_ENUM.MY_ACTIVITIES]}
-        />
-
-        {activeTab === TAB_ENUM.ALL && <>{renderActivities()}</>}
-        {activeTab === TAB_ENUM.MY_ACTIVITIES && <>{renderUserActivities()}</>}
-      </Animated.ScrollView>
-
-      {/* Wrap your Pressable in an Animated.View */}
-      <Animated.View
-        style={[
-          styles.stickyButtonWrapper, // A new style to position it statically
-          { bottom: insets.bottom + 20, right: 20 }, // Static position
-          animatedButtonStyles, // Animated transform
-        ]}
-      >
-        <Pressable onPress={handleStickyPress}>
-          <LinearGradient
-            colors={['#FF5F6D', '#FFC371']}
-            start={[0, 0]}
-            end={[1, 0]}
-            style={styles.stickyButtonGradient}
-          >
-            <MaterialIcons name="add" size={20} color="#FFFFFF" />
-            <Text style={styles.stickyButtonText}>Add Activity</Text>
-          </LinearGradient>
+      <View style={[styles.header, { paddingTop: insets.top }]}>
+        <Pressable style={styles.backButton} onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={24} color="#111827" />
         </Pressable>
-      </Animated.View>
+        <Text style={styles.headerTitle}>Chat</Text>
+        <View style={styles.headerSpacer} />
+      </View>
+
+      <GiftedChat
+        messages={messages}
+        onSend={(messages) => onSend(messages)}
+        user={{
+          _id: currentUserId, // Important: Use the real Supabase User ID here
+        }}
+        keyboardAvoidingViewProps={{ keyboardVerticalOffset: headerHeight }}
+        renderBubble={renderBubble}
+        renderInputToolbar={(props) => renderInputToolbar(props, insets)}
+        renderSend={renderSend}
+        renderDay={renderDay}
+        textInputProps={{ placeholder: 'Type a message' }}
+        minInputToolbarHeight={60}
+      />
     </View>
   );
 }
@@ -179,36 +184,37 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#F9FBFF',
   },
-  scrollViewContent: {
-    flex: 1,
-    backgroundColor: 'transparent',
-    padding: 20,
-  },
-  // New wrapper style for the Animated.View
-  stickyButtonWrapper: {
-    position: 'absolute', // Fixed position
-    // No 'right' or 'bottom' here, they are passed dynamically
-    borderRadius: 28,
-    shadowColor: '#FF5F6D',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
-    elevation: 8,
-    zIndex: 1000,
-    overflow: 'hidden',
-  },
-  stickyButtonGradient: {
+  header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-    gap: 8,
+    justifyContent: 'space-between',
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
   },
-  stickyButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F3F4F6',
+  },
+  headerTitle: {
+    fontSize: 18,
     fontWeight: '600',
+    color: '#111827',
+  },
+  headerSpacer: {
+    width: 40,
   },
 });

@@ -11,7 +11,7 @@ import { activityService } from '@/services';
 import { Activity } from '@/types';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useHeaderHeight } from '@react-navigation/elements';
-import { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 

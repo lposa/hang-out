@@ -25,10 +25,9 @@ export default function RootLayout() {
   const router = useRouter();
 
   const [fontsLoaded, fontError] = useFonts({
-    Pacifico: require('@/assets/Pacifico-Regular.ttf'),
+    Pacifico: require('../assets/Pacifico-Regular.ttf'),
   });
 
-  // If fonts fail to load, we'll proceed anyway
   const fontsReady = fontsLoaded || fontError !== null;
 
   useEffect(() => {
@@ -132,17 +131,16 @@ export default function RootLayout() {
                 options={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' } }}
               />
               <Stack.Screen
-                name="modal"
+                name="(profile)/profile-screen/[id]"
                 options={{
                   presentation: 'modal',
-                  title: 'Modal',
+                  headerShown: false,
                   contentStyle: { backgroundColor: 'transparent' },
                 }}
               />
               <Stack.Screen
-                name="(profile)/profile-screen/[id]"
+                name="(chat)/[id]"
                 options={{
-                  presentation: 'modal',
                   headerShown: false,
                   contentStyle: { backgroundColor: 'transparent' },
                 }}

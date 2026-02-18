@@ -21,7 +21,7 @@ export const useProfile = () => {
       } = await supabase.auth.getUser();
 
       if (!user) {
-        console.log('No user logged in');
+        console.error('No user logged in');
         return;
       }
 
