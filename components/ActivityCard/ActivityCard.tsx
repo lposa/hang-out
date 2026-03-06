@@ -9,11 +9,42 @@ import { Href, router } from 'expo-router';
 import { ACTIVITY_STATUS_ENUM } from './types';
 import { useActivity } from '@/components/ActivityCard/hooks/useActivity';
 import { AcceptedRequests, PendingRequests } from '@/components/ActivityCard/components';
+import { useProfile } from '@/hooks';
+import { useEffect, useState } from 'react';
 
 interface IActivityCardProps {
   activityData: Activity;
   isCurrentUserActivity?: boolean;
 }
+
+const AvatarWithInitials = ({
+  avatarUrl,
+  firstName,
+  lastName,
+  size = 100,
+}: {
+  avatarUrl: string | null | undefined;
+  firstName: string;
+  lastName: string;
+  size?: number;
+}) => {
+  const initials = `${firstName?.[0] || ''}${lastName?.[0] || ''}`.toUpperCase();
+  const hasAvatar = avatarUrl && avatarUrl.trim() !== '';
+
+  if (hasAvatar) {
+    return <Image source={{ uri: avatarUrl }} style={[styles.profilePic, { width: size, height: size, borderRadius: size / 2 }]} />;
+  }
+
+  const colors = ['#6366F1', '#8B5CF6', '#EC4899', '#F59E0B', '#10B981'] as const;
+  const colorIndex = (firstName.charCodeAt(0) + lastName.charCodeAt(0)) % colors.length;
+  const backgroundColor = colors[colorIndex];
+
+  return (
+    <View style={[styles.profilePic, styles.avatarPlaceholder, { width: size, height: size, borderRadius: size / 2, backgroundColor }]}>
+      <Text style={[styles.avatarInitials, { fontSize: size * 0.35 }]}>{initials}</Text>
+    </View>
+  );
+};
 
 export const ActivityCard = ({
   activityData,
@@ -31,6 +62,9 @@ export const ActivityCard = ({
     price,
   } = activityData;
 
+  const { getUserDataById } = useProfile();
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
   const {
     pendingRequests,
     acceptedParticipants,
@@ -38,6 +72,18 @@ export const ActivityCard = ({
     handleJoinActivity,
     handleMangeRequestStatus,
   } = useActivity({ isCurrentUserActivity, activityId });
+
+  useEffect(() => {
+    if (!isCurrentUserActivity && hostUserId) {
+      const fetchAvatar = async () => {
+        const profileData = await getUserDataById(hostUserId, '*');
+        if (profileData && 'image' in profileData) {
+          setAvatarUrl((profileData as { image?: string }).image || null);
+        }
+      };
+      fetchAvatar();
+    }
+  }, [hostUserId, isCurrentUserActivity, getUserDataById]);
 
   const handleOpenProfile = (profileId: string) => {
     router.push(`/(profile)/profile-screen/${profileId}` as Href);
@@ -56,9 +102,11 @@ export const ActivityCard = ({
             style={styles.profilePicContainer}
             onPress={() => handleOpenProfile(hostUserId)}
           >
-            <Image
-              source={require('@/assets/images/leonard_posa.jpeg')}
-              style={styles.profilePic}
+            <AvatarWithInitials
+              avatarUrl={avatarUrl}
+              firstName={first_name}
+              lastName={last_name}
+              size={100}
             />
           </Pressable>
 
@@ -73,7 +121,7 @@ export const ActivityCard = ({
       <View
         style={[
           styles.activityInformationContainer,
-          isCurrentUserActivity ? { paddingTop: 20 } : { paddingTop: 85 },
+          isCurrentUserActivity ? { paddingTop: 20 } : { paddingTop: 60 },
         ]}
       >
         <View style={styles.activityHeader}>

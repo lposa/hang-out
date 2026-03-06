@@ -8,10 +8,10 @@ export const styles = StyleSheet.create({
   profilePicContainer: {
     position: 'absolute',
     zIndex: 2,
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-    top: -75,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    top: -50,
     left: 20,
     shadowColor: '#82D0EE',
     shadowOffset: { width: 5, height: 5 },
@@ -21,9 +21,19 @@ export const styles = StyleSheet.create({
   },
 
   profilePic: {
-    width: 150,
-    height: 150,
-    borderRadius: 75,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+  },
+  avatarPlaceholder: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  avatarInitials: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
 
   activityInformationContainer: {

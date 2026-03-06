@@ -5,7 +5,7 @@ import { View, Text, StyleSheet, Pressable, ActivityIndicator } from 'react-nati
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
-import { renderBubble, renderDay, renderInputToolbar, renderSend } from '@/components/Chat';
+import { renderBubble, renderDay, renderInputToolbar, renderSend, renderAvatar } from '@/components/Chat';
 import { useChat } from '@/hooks';
 
 export default function ChatScreen() {
@@ -19,11 +19,13 @@ export default function ChatScreen() {
 
   if (isLoading || !currentUserId) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+      <View style={[styles.container, styles.loadingContainer]}>
         <ActivityIndicator size="large" color="#FF5F6D" />
       </View>
     );
   }
+
+  const guestUser = messages.find((message) => message.user._id !== currentUserId);
 
   return (
     <View style={styles.container}>
@@ -31,7 +33,7 @@ export default function ChatScreen() {
         <Pressable style={styles.backButton} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color="#111827" />
         </Pressable>
-        <Text style={styles.headerTitle}>Chat</Text>
+        <Text style={styles.headerTitle}>Chat with {guestUser?.user?.name || 'User'}</Text>
         <View style={styles.headerSpacer} />
       </View>
       <GiftedChat
@@ -39,12 +41,16 @@ export default function ChatScreen() {
         onSend={(messages: IMessage[]) => onSend(messages)}
         user={{
           _id: currentUserId,
+          avatar: require('@/assets/images/leonard_posa.jpeg'),
         }}
         keyboardAvoidingViewProps={{ keyboardVerticalOffset: headerHeight }}
         renderBubble={renderBubble}
         renderInputToolbar={(props) => renderInputToolbar(props, insets)}
         renderSend={renderSend}
         renderDay={renderDay}
+        renderAvatar={renderAvatar}
+        showUserAvatar
+        showAvatarForEveryMessage
         textInputProps={{ placeholder: 'Type a message' }}
         minInputToolbarHeight={60}
       />
@@ -87,5 +93,10 @@ const styles = StyleSheet.create({
   },
   headerSpacer: {
     width: 40,
+  },
+
+  loadingContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

@@ -8,8 +8,10 @@ import {
   InputToolbarProps,
   Send,
   SendProps,
+  Avatar,
+  AvatarProps,
 } from 'react-native-gifted-chat';
-import { Insets, StyleSheet, View } from 'react-native';
+import { Insets, KeyboardAvoidingView, Platform, StyleSheet, View, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 
@@ -60,14 +62,16 @@ export const renderBubble = (props: BubbleProps<IMessage>) => {
 
 export const renderInputToolbar = (props: InputToolbarProps<IMessage>, insets: Insets) => {
   return (
-    <InputToolbar
-      {...props}
-      containerStyle={[
-        styles.inputToolbar,
-        !!insets.bottom && { paddingBottom: insets.bottom + 8 },
-      ]}
-      primaryStyle={styles.inputPrimary}
-    />
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <InputToolbar
+        {...props}
+        containerStyle={[
+          styles.inputToolbar,
+          !!insets.bottom && { paddingBottom: insets.bottom + 8 },
+        ]}
+        primaryStyle={styles.inputPrimary}
+      />
+    </KeyboardAvoidingView>
   );
 };
 
@@ -83,6 +87,36 @@ export const renderSend = (props: SendProps<IMessage>) => {
 
 export const renderDay = (props: DayProps) => {
   return <Day {...props} wrapperStyle={styles.dayWrapper} />;
+};
+
+export const renderAvatar = (props: AvatarProps<IMessage>) => {
+  const placeholderAvatar = require('@/assets/images/leonard_posa.jpeg');
+  const avatarSource = props.currentMessage?.user?.avatar || placeholderAvatar;
+  
+  if (!props.currentMessage) {
+    return null;
+  }
+
+  return (
+    <Avatar
+      {...props}
+      currentMessage={{
+        ...props.currentMessage,
+        user: {
+          ...props.currentMessage.user,
+          avatar: avatarSource,
+        },
+      }}
+      imageStyle={{
+        left: styles.avatarLeft,
+        right: styles.avatarRight,
+      }}
+      containerStyle={{
+        left: styles.avatarContainerLeft,
+        right: styles.avatarContainerRight,
+      }}
+    />
+  );
 };
 
 const styles = StyleSheet.create({
@@ -131,5 +165,23 @@ const styles = StyleSheet.create({
     color: '#6366F1',
     fontSize: 12,
     fontWeight: '600',
+  },
+  avatarLeft: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+  },
+  avatarRight: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+  },
+  avatarContainerLeft: {
+    marginRight: 8,
+    marginBottom: 4,
+  },
+  avatarContainerRight: {
+    marginLeft: 8,
+    marginBottom: 4,
   },
 });

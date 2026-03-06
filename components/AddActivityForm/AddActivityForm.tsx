@@ -11,7 +11,6 @@ import { FormSelect } from '@/components/elements/FormSelect';
 import { supabase } from '@/services/Supabase';
 import { TABLE_ENUM } from '@/constants';
 import { useToast } from '@/context/ToastContext';
-import { UserMetadata } from '@supabase/auth-js';
 
 type ActivityFormData = {
   userId: string;
@@ -73,15 +72,20 @@ export const AddActivityForm = ({ onSubmitCallback }: IAddActivityForm) => {
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) {
+      setIsSubmitting(false);
       return;
     }
 
-    const metadata = user.user_metadata as UserMetadata;
+    const { data: profile } = await supabase
+      .from(TABLE_ENUM.PROFILES)
+      .select('first_name, last_name')
+      .eq('id', user.id)
+      .single();
 
     const activityData = {
       user_id: user.id,
-      first_name: metadata.first_name ?? '',
-      last_name: metadata.last_name ?? '',
+      first_name: profile?.first_name || '',
+      last_name: profile?.last_name || '',
       email: user.email,
       activity_type: formData.activityType,
       activity_data: selectedMovies[0] ?? null,
@@ -96,7 +100,7 @@ export const AddActivityForm = ({ onSubmitCallback }: IAddActivityForm) => {
     setIsSubmitting(false);
 
     if (error) {
-      showToast(error.message || 'Failed to save profile', 'error');
+      showToast(error.message || 'Failed to save activity', 'error');
       console.log(error);
     } else {
       showToast('Activity added!', 'success');

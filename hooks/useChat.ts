@@ -15,6 +15,7 @@ interface IMessageDB {
   user: {
     id: string;
     first_name: string;
+    last_name: string;
     avatar_url: string | null;
   };
 }
@@ -76,8 +77,8 @@ export const useChat = ({ activityId }: IUseChatProps) => {
           createdAt: new Date(msg.created_at),
           user: {
             _id: msg.user_id,
-            name: msg.user?.first_name || 'User',
-            //avatar: msg.user?.avatar_url || require('@/assets/images/leonard_posa.jpeg'),
+            name: `${msg.user?.first_name || ''} ${msg.user?.last_name || ''}`.trim() || 'User',
+            avatar: require('@/assets/images/leonard_posa.jpeg'),
           },
         }));
         setMessages(formattedMessages);
@@ -103,7 +104,7 @@ export const useChat = ({ activityId }: IUseChatProps) => {
           }
           const { data: senderProfile } = await supabase
             .from(TABLE_ENUM.PROFILES)
-            .select('first_name')
+            .select('first_name, last_name')
             .eq('id', payload.new.user_id)
             .single();
 
@@ -113,8 +114,10 @@ export const useChat = ({ activityId }: IUseChatProps) => {
             createdAt: new Date(payload.new.created_at),
             user: {
               _id: payload.new.user_id,
-              name: senderProfile?.first_name || 'User',
-              avatar: require('@/assets/images/leonard_posa.jpeg'), //|| senderProfile?.avatar_url,
+              name:
+                `${senderProfile?.first_name || ''} ${senderProfile?.last_name || ''}`.trim() ||
+                'User',
+              avatar: require('@/assets/images/leonard_posa.jpeg'),
             },
           };
 
