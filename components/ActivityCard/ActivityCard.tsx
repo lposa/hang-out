@@ -32,7 +32,12 @@ const AvatarWithInitials = ({
   const hasAvatar = avatarUrl && avatarUrl.trim() !== '';
 
   if (hasAvatar) {
-    return <Image source={{ uri: avatarUrl }} style={[styles.profilePic, { width: size, height: size, borderRadius: size / 2 }]} />;
+    return (
+      <Image
+        source={{ uri: avatarUrl }}
+        style={[styles.profilePic, { width: size, height: size, borderRadius: size / 2 }]}
+      />
+    );
   }
 
   const colors = ['#6366F1', '#8B5CF6', '#EC4899', '#F59E0B', '#10B981'] as const;
@@ -40,7 +45,13 @@ const AvatarWithInitials = ({
   const backgroundColor = colors[colorIndex];
 
   return (
-    <View style={[styles.profilePic, styles.avatarPlaceholder, { width: size, height: size, borderRadius: size / 2, backgroundColor }]}>
+    <View
+      style={[
+        styles.profilePic,
+        styles.avatarPlaceholder,
+        { width: size, height: size, borderRadius: size / 2, backgroundColor },
+      ]}
+    >
       <Text style={[styles.avatarInitials, { fontSize: size * 0.35 }]}>{initials}</Text>
     </View>
   );
@@ -71,7 +82,18 @@ export const ActivityCard = ({
     currentUserParticipationStatus,
     handleJoinActivity,
     handleMangeRequestStatus,
+    handleCompleteActivity,
   } = useActivity({ isCurrentUserActivity, activityId });
+
+  const shouldRenderPendingRequest =
+    isCurrentUserActivity &&
+    pendingRequests &&
+    pendingRequests?.length > 0 &&
+    acceptedParticipants &&
+    acceptedParticipants.length === 0;
+
+  const shouldRenderAcceptedRequest =
+    isCurrentUserActivity && acceptedParticipants && acceptedParticipants.length > 0;
 
   useEffect(() => {
     if (!isCurrentUserActivity && hostUserId) {
@@ -174,27 +196,24 @@ export const ActivityCard = ({
           </>
         )}
 
-        {isCurrentUserActivity && acceptedParticipants && acceptedParticipants.length > 0 && (
+        {shouldRenderAcceptedRequest && (
           <AcceptedRequests
             acceptedParticipants={acceptedParticipants}
             handleOpenProfile={handleOpenProfile}
             handleManageRequestStatus={handleMangeRequestStatus}
             activityId={activityId}
+            onCompleteActivity={handleCompleteActivity}
           />
         )}
 
-        {isCurrentUserActivity &&
-          pendingRequests &&
-          pendingRequests?.length > 0 &&
-          acceptedParticipants &&
-          acceptedParticipants.length === 0 && (
-            <PendingRequests
-              pendingRequests={pendingRequests}
-              handleOpenProfile={handleOpenProfile}
-              activityId={activityId}
-              handleMangeRequestStatus={handleMangeRequestStatus}
-            />
-          )}
+        {shouldRenderPendingRequest && (
+          <PendingRequests
+            pendingRequests={pendingRequests}
+            handleOpenProfile={handleOpenProfile}
+            activityId={activityId}
+            handleMangeRequestStatus={handleMangeRequestStatus}
+          />
+        )}
       </View>
     </View>
   );

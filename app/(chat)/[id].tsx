@@ -5,7 +5,13 @@ import { View, Text, StyleSheet, Pressable, ActivityIndicator } from 'react-nati
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
-import { renderBubble, renderDay, renderInputToolbar, renderSend, renderAvatar } from '@/components/Chat';
+import {
+  renderBubble,
+  renderDay,
+  renderInputToolbar,
+  renderSend,
+  renderAvatar,
+} from '@/components/Chat';
 import { useChat } from '@/hooks';
 
 export default function ChatScreen() {
@@ -49,8 +55,6 @@ export default function ChatScreen() {
         renderSend={renderSend}
         renderDay={renderDay}
         renderAvatar={renderAvatar}
-        showUserAvatar
-        showAvatarForEveryMessage
         textInputProps={{ placeholder: 'Type a message' }}
         minInputToolbarHeight={60}
       />

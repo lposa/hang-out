@@ -2,6 +2,7 @@ export enum ACTIVITY_STATUS_ENUM {
   PENDING = 'pending',
   ACCEPTED = 'accepted',
   DECLINED = 'declined',
+  COMPLETED = 'completed',
 }
 
 export interface IParticipantProfile {

@@ -7,7 +7,7 @@ interface IPendingRequestsProps {
   pendingRequests: IPendingActivityParticipant[] | null;
   handleOpenProfile: (profileId: string) => void;
   activityId: string;
-  handleMangeRequestStatus: (id: string, status: ACTIVITY_STATUS_ENUM) => void;
+  handleMangeRequestStatus: (status: ACTIVITY_STATUS_ENUM, id: string, activityId?: string) => void;
 }
 
 export const PendingRequests = ({
@@ -38,13 +38,13 @@ export const PendingRequests = ({
               <View style={styles.requestActions}>
                 <Pressable
                   style={styles.acceptButton}
-                  onPress={() => handleMangeRequestStatus(item.id, ACTIVITY_STATUS_ENUM.ACCEPTED)}
+                  onPress={() => handleMangeRequestStatus(ACTIVITY_STATUS_ENUM.ACCEPTED, item.id)}
                 >
                   <Ionicons name="checkmark" size={20} color="#FFFFFF" />
                 </Pressable>
                 <Pressable
                   style={styles.declineButton}
-                  onPress={() => handleMangeRequestStatus(item.id, ACTIVITY_STATUS_ENUM.DECLINED)}
+                  onPress={() => handleMangeRequestStatus(ACTIVITY_STATUS_ENUM.DECLINED, item.id)}
                 >
                   <Ionicons name="close" size={20} color="#FFFFFF" />
                 </Pressable>

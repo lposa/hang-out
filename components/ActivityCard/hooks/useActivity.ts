@@ -137,11 +137,16 @@ export const useActivity = ({
     }
   }, [currentUserId, isCurrentUserActivity, activityId]);
 
-  const handleMangeRequestStatus = async (participantId: string, status: ACTIVITY_STATUS_ENUM) => {
-    const { error } = await supabase
-      .from(TABLE_ENUM.ACTIVITY_PARTICIPANTS)
-      .update({ status: status })
-      .eq('id', participantId);
+  const handleMangeRequestStatus = async (
+    status: ACTIVITY_STATUS_ENUM,
+    participantId?: string,
+    activityId?: string
+  ) => {
+    const query = supabase.from(TABLE_ENUM.ACTIVITY_PARTICIPANTS).update({ status: status });
+
+    const { error } = activityId
+      ? await query.eq('activity_id', activityId)
+      : await query.eq('id', participantId);
 
     if (error) {
       console.error('Error managing request:', error);
@@ -149,10 +154,72 @@ export const useActivity = ({
       return;
     }
 
-    const statusText = status === ACTIVITY_STATUS_ENUM.ACCEPTED ? 'Accepted' : 'Declined';
+    let statusText = '';
+
+    switch (status) {
+      case ACTIVITY_STATUS_ENUM.ACCEPTED:
+        statusText = 'accepted';
+        break;
+      case ACTIVITY_STATUS_ENUM.COMPLETED:
+        statusText = 'completed';
+        break;
+      case ACTIVITY_STATUS_ENUM.DECLINED:
+        statusText = 'declined';
+        break;
+    }
 
     showToast(`Request ${statusText}!`, 'success');
     await fetchAndSetRequests();
+  };
+
+  const deleteChat = async () => {
+    const { error } = await supabase
+      .from(TABLE_ENUM.MESSAGES)
+      .delete()
+      .match({ activity_id: activityId });
+
+    if (error) {
+      console.error('Error deleting messages', error);
+      return;
+    }
+  };
+
+  const rateUser = async (score: number) => {
+    const { data: activityParticipantsData, error: activityParticipantsError } = await supabase
+      .from(TABLE_ENUM.ACTIVITY_PARTICIPANTS)
+      .select('*')
+      .eq('activity_id', activityId)
+      .single();
+
+    if (activityParticipantsError) {
+      console.error('Error fetching activity participants:', activityParticipantsError);
+      throw new Error('Failed to fetch activity participants');
+    }
+
+    const { guest_user_id } = activityParticipantsData || {};
+
+    const { data, error } = await supabase.rpc('add_review', {
+      target_id: guest_user_id,
+      new_rating: score,
+    });
+
+    if (error) {
+      console.error('Error rating user:', error);
+      throw new Error('Failed to rate user');
+    }
+  };
+
+  const handleCompleteActivity = async (reviewScore: number) => {
+    try {
+      await Promise.all([rateUser(reviewScore), deleteChat()]);
+
+      showToast('Activity completed successfully!', 'success');
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error('Error completing activity:', error);
+        showToast(`Failed to complete activity: ${error.message}`, 'error');
+      }
+    }
   };
 
   return {
@@ -161,5 +228,6 @@ export const useActivity = ({
     currentUserParticipationStatus,
     handleJoinActivity,
     handleMangeRequestStatus,
+    handleCompleteActivity,
   };
 };
