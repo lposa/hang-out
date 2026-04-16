@@ -33,7 +33,7 @@ const activityTypeOptions = [
 const MAX_MOVIES_SELECTION = 1;
 
 interface IAddActivityForm {
-  onSubmitCallback?: () => void;
+  onSubmitCallback?: () => void | Promise<void>;
 }
 
 export const AddActivityForm = ({ onSubmitCallback }: IAddActivityForm) => {
@@ -105,7 +105,9 @@ export const AddActivityForm = ({ onSubmitCallback }: IAddActivityForm) => {
     } else {
       showToast('Activity added!', 'success');
 
-      onSubmitCallback && onSubmitCallback();
+      if (onSubmitCallback) {
+        await onSubmitCallback();
+      }
     }
   };
 

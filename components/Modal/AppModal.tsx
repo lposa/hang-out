@@ -1,4 +1,13 @@
-import { View, Modal, Pressable, StyleSheet, Text, ScrollView } from 'react-native';
+import {
+  View,
+  Modal,
+  Pressable,
+  StyleSheet,
+  Text,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
 import { styles } from './AppModal.styles';
 import { ReactNode } from 'react';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -19,7 +28,10 @@ export const AppModal = ({ visible, onClose, children, title }: IAppModalProps) 
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View style={styles.backdrop}>
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
-        <View style={styles.modal}>
+        <KeyboardAvoidingView
+          style={styles.modal}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        >
           <LinearGradient
             colors={['#F9FBFF', '#EEF3FF']}
             start={[0, 0]}
@@ -41,11 +53,13 @@ export const AppModal = ({ visible, onClose, children, title }: IAppModalProps) 
                 { paddingBottom: insets.bottom + 20 },
               ]}
               showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              keyboardDismissMode="interactive"
             >
               {children}
             </ScrollView>
           </LinearGradient>
-        </View>
+        </KeyboardAvoidingView>
       </View>
     </Modal>
   );

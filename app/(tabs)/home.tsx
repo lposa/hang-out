@@ -32,17 +32,22 @@ export default function HomeScreen() {
     setIsModalVisible(true);
   };
 
+  const fetchActivities = async () => {
+    const activities = await activityService.fetchAllActivities();
+    setActivities(activities);
+  };
+
+  const fetchUserActivities = async () => {
+    const userActivities = await activityService.fetchCurrentUserActivities();
+    setUserActivities(userActivities);
+  };
+
+  const addActivityCallback = async () => {
+    await Promise.all([fetchActivities(), fetchUserActivities()]);
+    setIsModalVisible(false);
+  };
+
   useEffect(() => {
-    const fetchActivities = async () => {
-      const activities = await activityService.fetchAllActivities();
-      setActivities(activities);
-    };
-
-    const fetchUserActivities = async () => {
-      const userActivities = await activityService.fetchCurrentUserActivities();
-      setUserActivities(userActivities);
-    };
-
     fetchActivities();
     fetchUserActivities();
   }, []);
@@ -117,7 +122,7 @@ export default function HomeScreen() {
         onClose={() => setIsModalVisible(false)}
         title="Add Activity"
       >
-        <AddActivityForm onSubmitCallback={() => setIsModalVisible(false)} />
+        <AddActivityForm onSubmitCallback={addActivityCallback} />
       </AppModal>
       <ScrollView
         style={styles.scrollViewContent}

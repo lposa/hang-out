@@ -19,7 +19,11 @@ const sidebars: SidebarsConfig = {
         'flows/chat',
       ],
     },
-    'appendix/table-reference',
+    {
+      type: 'category',
+      label: 'Appendix',
+      items: ['appendix/table-reference', 'appendix/bug-and-feature-log'],
+    },
   ],
 };
 

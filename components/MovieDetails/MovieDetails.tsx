@@ -38,6 +38,7 @@ export const MovieDetails = ({
   isEditMode = false,
 }: IMovieDetailsProps) => {
   const [isLoadingImage, setIsLoadingImage] = useState(true);
+  const lastLoadedImageKey = useRef<string | null>(null);
   const shimmerAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -71,6 +72,7 @@ export const MovieDetails = ({
   }
 
   const imageSource = movie?.image ? { uri: movie.image } : PLACEHOLDER_IMAGE;
+  const imageKey = movie?.image ?? 'placeholder';
   const year = movie.releaseDate ? movie.releaseDate.split('-')[0] : null;
   const runtime = formatRuntime(movie.runtime);
   const primaryGenre = movie.genre && movie.genre.length > 0 ? movie.genre[0] : null;
@@ -107,12 +109,16 @@ export const MovieDetails = ({
           style={[styles.movieDetailsPoster, customImageStyle]}
           resizeMode="cover"
           onLoadStart={() => {
-            setIsLoadingImage(true);
+            if (lastLoadedImageKey.current !== imageKey) {
+              setIsLoadingImage(true);
+            }
           }}
           onLoadEnd={() => {
+            lastLoadedImageKey.current = imageKey;
             setIsLoadingImage(false);
           }}
           onError={(error) => {
+            lastLoadedImageKey.current = imageKey;
             setIsLoadingImage(false);
             console.warn('Image load error:', error.nativeEvent?.error || error);
           }}
