@@ -1,4 +1,5 @@
 import { MappedMovie } from '@/types/movies';
+import { ACTIVITY_LIFECYCLE_STATUS_ENUM } from '@/constants';
 
 export type Activity = {
   id: string;
@@ -13,6 +14,7 @@ export type Activity = {
   place: string;
   price: string;
   created_at: string;
+  status?: ACTIVITY_LIFECYCLE_STATUS_ENUM;
 };
 
 export type MatchCategory = 'movies' | 'books' | 'tv_shows';

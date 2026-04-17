@@ -1,8 +1,12 @@
 import { useEffect, useState } from 'react';
-import { ACTIVITY_STATUS_ENUM, IPendingActivityParticipant } from '@/components/ActivityCard/types';
+import {
+  PARTICIPANT_STATUS_ENUM,
+  IPendingActivityParticipant,
+} from '@/components/ActivityCard/types';
 import { supabase } from '@/services/Supabase';
-import { TABLE_ENUM } from '@/constants';
+import { ACTIVITY_LIFECYCLE_STATUS_ENUM, TABLE_ENUM } from '@/constants';
 import { useToast } from '@/context/ToastContext';
+import { activityService } from '@/services';
 
 export const useActivity = ({
   isCurrentUserActivity,
@@ -21,7 +25,7 @@ export const useActivity = ({
   >(null);
 
   const [currentUserParticipationStatus, setCurrentUserParticipationStatus] = useState<
-    ACTIVITY_STATUS_ENUM | 'none'
+    PARTICIPANT_STATUS_ENUM | 'none'
   >('none');
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
@@ -49,14 +53,14 @@ export const useActivity = ({
     const { error } = await supabase.from(TABLE_ENUM.ACTIVITY_PARTICIPANTS).insert({
       activity_id: activityId,
       guest_user_id: currentUserId,
-      status: ACTIVITY_STATUS_ENUM.PENDING,
+      status: PARTICIPANT_STATUS_ENUM.PENDING,
     });
 
     if (error) {
       console.error('Error joining activity:', error.message);
       if (error.code === '23505') {
         showToast('You have already requested to join this activity.', 'info');
-        setCurrentUserParticipationStatus(ACTIVITY_STATUS_ENUM.PENDING);
+        setCurrentUserParticipationStatus(PARTICIPANT_STATUS_ENUM.PENDING);
       } else {
         showToast(`Failed to join activity: ${error.message}`, 'error');
       }
@@ -64,7 +68,7 @@ export const useActivity = ({
     }
 
     showToast('Request to join activity sent successfully', 'success');
-    setCurrentUserParticipationStatus(ACTIVITY_STATUS_ENUM.PENDING);
+    setCurrentUserParticipationStatus(PARTICIPANT_STATUS_ENUM.PENDING);
 
     // TODO: Add notification logic to send push notification to the host (hostUserId)
     // Example: await sendPushNotification(hostUserId, "New Join Request!", `${currentUser.first_name} wants to join your activity.`);
@@ -87,7 +91,7 @@ export const useActivity = ({
         `
       )
       .eq('activity_id', activityId)
-      .in('status', [ACTIVITY_STATUS_ENUM.PENDING, ACTIVITY_STATUS_ENUM.ACCEPTED]);
+      .in('status', [PARTICIPANT_STATUS_ENUM.PENDING, PARTICIPANT_STATUS_ENUM.ACCEPTED]);
 
     if (error) {
       console.error('Error fetching pending requests:', error);
@@ -95,13 +99,13 @@ export const useActivity = ({
       setPendingRequests(null);
     } else {
       const filteredPending = (data as unknown as IPendingActivityParticipant[]).filter(
-        (item) => item.status === ACTIVITY_STATUS_ENUM.PENDING
+        (item) => item.status === PARTICIPANT_STATUS_ENUM.PENDING
       );
 
       setPendingRequests(filteredPending);
 
       const filteredAccepted = (data as unknown as IPendingActivityParticipant[]).filter(
-        (item) => item.status === ACTIVITY_STATUS_ENUM.ACCEPTED
+        (item) => item.status === PARTICIPANT_STATUS_ENUM.ACCEPTED
       );
 
       setAcceptedParticipants(filteredAccepted);
@@ -121,7 +125,7 @@ export const useActivity = ({
     if (error && error.code !== 'PGRST116') {
       console.error('Error checking participation status:', error);
     } else if (data) {
-      setCurrentUserParticipationStatus(data.status as ACTIVITY_STATUS_ENUM);
+      setCurrentUserParticipationStatus(data.status as PARTICIPANT_STATUS_ENUM);
     } else {
       setCurrentUserParticipationStatus('none');
     }
@@ -137,8 +141,8 @@ export const useActivity = ({
     }
   }, [currentUserId, isCurrentUserActivity, activityId]);
 
-  const handleMangeRequestStatus = async (
-    status: ACTIVITY_STATUS_ENUM,
+  const handleManageRequestStatus = async (
+    status: PARTICIPANT_STATUS_ENUM,
     participantId?: string,
     activityId?: string
   ) => {
@@ -157,15 +161,22 @@ export const useActivity = ({
     let statusText = '';
 
     switch (status) {
-      case ACTIVITY_STATUS_ENUM.ACCEPTED:
+      case PARTICIPANT_STATUS_ENUM.ACCEPTED:
         statusText = 'accepted';
         break;
-      case ACTIVITY_STATUS_ENUM.COMPLETED:
+      case PARTICIPANT_STATUS_ENUM.COMPLETED:
         statusText = 'completed';
         break;
-      case ACTIVITY_STATUS_ENUM.DECLINED:
+      case PARTICIPANT_STATUS_ENUM.DECLINED:
         statusText = 'declined';
         break;
+    }
+
+    if (status === PARTICIPANT_STATUS_ENUM.ACCEPTED && activityId) {
+      await activityService.updateActivityStatus(
+        activityId,
+        ACTIVITY_LIFECYCLE_STATUS_ENUM.IN_PROGRESS
+      );
     }
 
     showToast(`Request ${statusText}!`, 'success');
@@ -209,9 +220,14 @@ export const useActivity = ({
     }
   };
 
-  const handleCompleteActivity = async (reviewScore: number) => {
+  const handleCompleteActivity = async (reviewScore: number, activityId: string) => {
     try {
-      await Promise.all([rateUser(reviewScore), deleteChat()]);
+      await Promise.all([
+        rateUser(reviewScore),
+        deleteChat(),
+        activityService.updateActivityStatus(activityId, ACTIVITY_LIFECYCLE_STATUS_ENUM.COMPLETED),
+        handleManageRequestStatus(PARTICIPANT_STATUS_ENUM.COMPLETED, activityId),
+      ]);
 
       showToast('Activity completed successfully!', 'success');
     } catch (error) {
@@ -227,7 +243,7 @@ export const useActivity = ({
     acceptedParticipants,
     currentUserParticipationStatus,
     handleJoinActivity,
-    handleMangeRequestStatus,
+    handleManageRequestStatus,
     handleCompleteActivity,
   };
 };

@@ -6,11 +6,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image, Pressable, Text, View } from 'react-native';
 import { styles } from './ActivityCard.styles';
 import { Href, router } from 'expo-router';
-import { ACTIVITY_STATUS_ENUM } from './types';
+import { PARTICIPANT_STATUS_ENUM } from './types';
 import { useActivity } from '@/components/ActivityCard/hooks/useActivity';
 import { AcceptedRequests, PendingRequests } from '@/components/ActivityCard/components';
 import { useProfile } from '@/hooks';
 import { useEffect, useState } from 'react';
+import { ACTIVITY_LIFECYCLE_STATUS_ENUM } from '@/constants';
 
 interface IActivityCardProps {
   activityData: Activity;
@@ -71,7 +72,11 @@ export const ActivityCard = ({
     time,
     place,
     price,
+    status,
   } = activityData;
+
+  const normalizedActivityStatus = status ?? ACTIVITY_LIFECYCLE_STATUS_ENUM.PENDING;
+  const isCompleted = normalizedActivityStatus === ACTIVITY_LIFECYCLE_STATUS_ENUM.COMPLETED;
 
   const { getUserDataById } = useProfile();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
@@ -81,7 +86,7 @@ export const ActivityCard = ({
     acceptedParticipants,
     currentUserParticipationStatus,
     handleJoinActivity,
-    handleMangeRequestStatus,
+    handleManageRequestStatus,
     handleCompleteActivity,
   } = useActivity({ isCurrentUserActivity, activityId });
 
@@ -94,6 +99,22 @@ export const ActivityCard = ({
 
   const shouldRenderAcceptedRequest =
     isCurrentUserActivity && acceptedParticipants && acceptedParticipants.length > 0;
+
+  const getStatusPill = () => {
+    switch (normalizedActivityStatus) {
+      case ACTIVITY_LIFECYCLE_STATUS_ENUM.IN_PROGRESS:
+        return { label: 'In progress', variant: 'in_progress' as const };
+      case ACTIVITY_LIFECYCLE_STATUS_ENUM.DECLINED:
+        return { label: 'Declined', variant: 'declined' as const };
+      case ACTIVITY_LIFECYCLE_STATUS_ENUM.COMPLETED:
+        return { label: 'Completed', variant: 'completed' as const };
+      case ACTIVITY_LIFECYCLE_STATUS_ENUM.PENDING:
+      default:
+        return { label: 'Pending', variant: 'pending' as const };
+    }
+  };
+
+  const statusPill = getStatusPill();
 
   useEffect(() => {
     if (!isCurrentUserActivity && hostUserId) {
@@ -144,8 +165,21 @@ export const ActivityCard = ({
         style={[
           styles.activityInformationContainer,
           isCurrentUserActivity ? { paddingTop: 20 } : { paddingTop: 60 },
+          styles.statusBorderBase,
+          styles[`statusBorder_${statusPill.variant}`],
+          isCompleted && styles.activityCompleted,
         ]}
       >
+        <View
+          style={[
+            styles.statusPill,
+            !isCurrentUserActivity && styles.statusPillWithPosterOffset,
+            styles[`statusPill_${statusPill.variant}`],
+          ]}
+        >
+          <Text style={styles.statusPillText}>{statusPill.label}</Text>
+        </View>
+
         <View style={styles.activityHeader}>
           <Text style={styles.activityTitle} numberOfLines={2} ellipsizeMode="tail">
             {activityDetails?.title}
@@ -176,44 +210,46 @@ export const ActivityCard = ({
           </View>
         </View>
 
-        {!isCurrentUserActivity && (
+        {!isCurrentUserActivity && !isCompleted && (
           <>
             {currentUserParticipationStatus === 'none' && (
               <GradientButton text="Join Activity" onPress={handleJoinActivity} />
             )}
-            {currentUserParticipationStatus === ACTIVITY_STATUS_ENUM.PENDING && (
+            {currentUserParticipationStatus === PARTICIPANT_STATUS_ENUM.PENDING && (
               <Text style={styles.statusText}>Request Sent. Waiting for host approval.</Text>
             )}
-            {currentUserParticipationStatus === ACTIVITY_STATUS_ENUM.ACCEPTED && (
+            {currentUserParticipationStatus === PARTICIPANT_STATUS_ENUM.ACCEPTED && (
               <GradientButton
                 text="View Chat"
                 onPress={() => router.push(`/(chat)/${activityId}` as Href)}
               />
             )}
-            {currentUserParticipationStatus === ACTIVITY_STATUS_ENUM.DECLINED && (
+            {currentUserParticipationStatus === PARTICIPANT_STATUS_ENUM.DECLINED && (
               <Text style={styles.statusText}>Your request was declined.</Text>
             )}
           </>
         )}
 
-        {shouldRenderAcceptedRequest && (
+        {shouldRenderAcceptedRequest && !isCompleted && (
           <AcceptedRequests
             acceptedParticipants={acceptedParticipants}
             handleOpenProfile={handleOpenProfile}
-            handleManageRequestStatus={handleMangeRequestStatus}
+            handleManageRequestStatus={handleManageRequestStatus}
             activityId={activityId}
             onCompleteActivity={handleCompleteActivity}
           />
         )}
 
-        {shouldRenderPendingRequest && (
+        {shouldRenderPendingRequest && !isCompleted && (
           <PendingRequests
             pendingRequests={pendingRequests}
             handleOpenProfile={handleOpenProfile}
             activityId={activityId}
-            handleMangeRequestStatus={handleMangeRequestStatus}
+            handleMangeRequestStatus={handleManageRequestStatus}
           />
         )}
+
+        {isCompleted && <Text style={styles.completedText}>This activity is completed.</Text>}
       </View>
     </View>
   );

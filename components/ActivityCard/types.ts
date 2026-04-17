@@ -1,4 +1,4 @@
-export enum ACTIVITY_STATUS_ENUM {
+export enum PARTICIPANT_STATUS_ENUM {
   PENDING = 'pending',
   ACCEPTED = 'accepted',
   DECLINED = 'declined',
@@ -14,6 +14,6 @@ export interface IParticipantProfile {
 
 export interface IPendingActivityParticipant {
   id: string;
-  status: ACTIVITY_STATUS_ENUM;
+  status: PARTICIPANT_STATUS_ENUM;
   user: IParticipantProfile;
 }

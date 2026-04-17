@@ -1,8 +1,27 @@
 import { supabase } from '@/services/Supabase';
-import { TABLE_ENUM } from '@/constants';
+import { ACTIVITY_LIFECYCLE_STATUS_ENUM, TABLE_ENUM } from '@/constants';
 import { Activity } from '@/types/activity';
 
 export class ActivityService {
+  private async fetchStatusesByActivityIds(activityIds: string[]) {
+    if (activityIds.length === 0) return {};
+
+    const { data, error } = await supabase
+      .from(TABLE_ENUM.ACTIVITY_STATUSES)
+      .select('activity_id, status')
+      .in('activity_id', activityIds);
+
+    if (error) {
+      console.error('Error fetching activity statuses:', error);
+      return {};
+    }
+
+    return (data ?? []).reduce<Record<string, ACTIVITY_LIFECYCLE_STATUS_ENUM>>((acc, row) => {
+      acc[row.activity_id] = row.status as ACTIVITY_LIFECYCLE_STATUS_ENUM;
+      return acc;
+    }, {});
+  }
+
   async fetchAllActivities(): Promise<Activity[]> {
     const {
       data: { user },
@@ -17,7 +36,13 @@ export class ActivityService {
 
     if (error) throw error;
 
-    return data?.filter((data) => data.user_id !== user.id) ?? [];
+    const filtered = data?.filter((row) => row.user_id !== user.id) ?? [];
+    const statusByActivityId = await this.fetchStatusesByActivityIds(filtered.map((a) => a.id));
+
+    return filtered.map((activity) => ({
+      ...activity,
+      status: statusByActivityId[activity.id],
+    }));
   }
 
   async fetchCurrentUserActivities(): Promise<Activity[]> {
@@ -34,6 +59,48 @@ export class ActivityService {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return data ?? [];
+
+    const rows = data ?? [];
+    const statusByActivityId = await this.fetchStatusesByActivityIds(rows.map((a) => a.id));
+
+    return rows.map((activity) => ({
+      ...activity,
+      status: statusByActivityId[activity.id],
+    }));
+  }
+
+  async updateActivityStatus(
+    activityId: string,
+    status: ACTIVITY_LIFECYCLE_STATUS_ENUM
+  ): Promise<boolean> {
+    if (!activityId) {
+      console.error('No activity id is provided');
+      return false;
+    }
+
+    const { data: updatedRows, error: updateError } = await supabase
+      .from(TABLE_ENUM.ACTIVITY_STATUSES)
+      .update({ status })
+      .eq('activity_id', activityId)
+      .select('activity_id');
+
+    if (updateError) {
+      console.error('Error updating activity status:', updateError);
+      return false;
+    }
+
+    if (!updatedRows || updatedRows.length === 0) {
+      const { error: insertError } = await supabase.from(TABLE_ENUM.ACTIVITY_STATUSES).insert({
+        activity_id: activityId,
+        status,
+      });
+
+      if (insertError) {
+        console.error('Error inserting initial activity status:', insertError);
+        return false;
+      }
+    }
+
+    return true;
   }
 }

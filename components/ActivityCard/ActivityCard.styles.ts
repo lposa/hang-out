@@ -48,6 +48,72 @@ export const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 5,
   },
+  statusBorderBase: {
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.06)',
+  },
+  statusBorder_pending: {
+    borderColor: 'rgba(245, 158, 11, 0.35)',
+  },
+  statusBorder_in_progress: {
+    borderColor: 'rgba(16, 185, 129, 0.35)',
+  },
+  statusBorder_declined: {
+    borderColor: 'rgba(239, 68, 68, 0.35)',
+  },
+  statusBorder_completed: {
+    borderColor: 'rgba(100, 116, 139, 0.35)',
+  },
+
+  statusPill: {
+    position: 'absolute',
+    top: 14,
+    right: 14,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 999,
+    zIndex: 10,
+    borderWidth: 1,
+  },
+  statusPillWithPosterOffset: {
+    top: 72,
+  },
+  statusPill_pending: {
+    backgroundColor: 'rgba(245, 158, 11, 0.12)',
+    borderColor: 'rgba(245, 158, 11, 0.25)',
+  },
+  statusPill_in_progress: {
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    borderColor: 'rgba(16, 185, 129, 0.25)',
+  },
+  statusPill_declined: {
+    backgroundColor: 'rgba(239, 68, 68, 0.12)',
+    borderColor: 'rgba(239, 68, 68, 0.25)',
+  },
+  statusPill_completed: {
+    backgroundColor: 'rgba(100, 116, 139, 0.12)',
+    borderColor: 'rgba(100, 116, 139, 0.25)',
+  },
+  statusPillText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#111827',
+    letterSpacing: 0.2,
+  },
+
+  activityCompleted: {
+    opacity: 0.82,
+  },
+  completedText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#64748B',
+    textAlign: 'center',
+    marginTop: 12,
+    paddingVertical: 10,
+    backgroundColor: 'rgba(255,255,255,0.6)',
+    borderRadius: 10,
+  },
   activityHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',

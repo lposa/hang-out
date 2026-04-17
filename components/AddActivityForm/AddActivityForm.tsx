@@ -9,7 +9,7 @@ import { MovieSearch } from '@/components/Search';
 import { useMovieSelection } from '@/hooks/useMovieSelection';
 import { FormSelect } from '@/components/elements/FormSelect';
 import { supabase } from '@/services/Supabase';
-import { TABLE_ENUM } from '@/constants';
+import { ACTIVITY_LIFECYCLE_STATUS_ENUM, TABLE_ENUM } from '@/constants';
 import { useToast } from '@/context/ToastContext';
 
 type ActivityFormData = {
@@ -95,13 +95,30 @@ export const AddActivityForm = ({ onSubmitCallback }: IAddActivityForm) => {
       price: formData.price,
     };
 
-    const { error } = await supabase.from(TABLE_ENUM.ACTIVITIES).upsert(activityData);
+    const { data: createdActivity, error } = await supabase
+      .from(TABLE_ENUM.ACTIVITIES)
+      .insert(activityData)
+      .select('id')
+      .single();
 
     setIsSubmitting(false);
 
     if (error) {
       showToast(error.message || 'Failed to save activity', 'error');
-      console.log(error);
+      console.error(error);
+      return;
+    }
+
+    const { error: activityStatusError } = await supabase
+      .from(TABLE_ENUM.ACTIVITY_STATUSES)
+      .insert({
+        activity_id: createdActivity.id,
+        status: ACTIVITY_LIFECYCLE_STATUS_ENUM.PENDING,
+      });
+
+    if (activityStatusError) {
+      showToast(activityStatusError.message || 'Failed to set initial activity status', 'error');
+      console.log(activityStatusError);
     } else {
       showToast('Activity added!', 'success');
 

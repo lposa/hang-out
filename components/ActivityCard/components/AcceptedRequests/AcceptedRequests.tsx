@@ -2,7 +2,10 @@ import { Image, Pressable, Text, TextInput, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { styles } from './AcceptedRequests.style';
-import { ACTIVITY_STATUS_ENUM, IPendingActivityParticipant } from '@/components/ActivityCard/types';
+import {
+  PARTICIPANT_STATUS_ENUM,
+  IPendingActivityParticipant,
+} from '@/components/ActivityCard/types';
 import { Href, router } from 'expo-router';
 import { AppModal } from '@/components/Modal';
 import React, { useState } from 'react';
@@ -10,9 +13,9 @@ import React, { useState } from 'react';
 interface IAcceptedRequestsProps {
   acceptedParticipants: IPendingActivityParticipant[];
   handleOpenProfile: (profileId: string) => void;
-  handleManageRequestStatus: (status: ACTIVITY_STATUS_ENUM, id: string) => void;
+  handleManageRequestStatus: (status: PARTICIPANT_STATUS_ENUM, id: string) => void;
   activityId: string;
-  onCompleteActivity: (reviewScore: number) => void;
+  onCompleteActivity: (reviewScore: number, activityId: string) => void;
 }
 
 const MIN_RATING = 1;
@@ -162,9 +165,9 @@ export const AcceptedRequests = ({
             <CompleteActivityButton
               onPress={() => {
                 if (!isRatingValid || rating === null) return;
-                //onCompleteActivity(rating);
-                handleManageRequestStatus(ACTIVITY_STATUS_ENUM.COMPLETED, activityId);
-                //setRatingInput('');
+                onCompleteActivity(rating, activityId);
+
+                setRatingInput('');
                 setIsModalVisible(false);
               }}
               disabled={!isRatingValid}
@@ -234,7 +237,7 @@ export const AcceptedRequests = ({
                 <Pressable
                   style={styles.cancelButton}
                   onPress={() =>
-                    handleManageRequestStatus(ACTIVITY_STATUS_ENUM.DECLINED, participant.id)
+                    handleManageRequestStatus(PARTICIPANT_STATUS_ENUM.DECLINED, participant.id)
                   }
                 >
                   <Ionicons name="close-circle-outline" size={20} color="#EF4444" />
