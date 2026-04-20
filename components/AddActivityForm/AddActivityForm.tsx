@@ -1,16 +1,18 @@
-import { View, Text } from 'react-native';
+import { View } from 'react-native';
 import { styles } from './AddActivityForm.styles';
-import { DatePickerInput, FormInput, GradientButton } from '@/components/elements';
+import { GradientButton } from '@/components/elements';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { ACTIVITY_TYPES_ENUM } from '@/constants/activity-types';
 import { MappedMovie } from '@/types';
-import { MovieSearch } from '@/components/Search';
 import { useMovieSelection } from '@/hooks/useMovieSelection';
 import { FormSelect } from '@/components/elements/FormSelect';
 import { supabase } from '@/services/Supabase';
-import { ACTIVITY_LIFECYCLE_STATUS_ENUM, TABLE_ENUM } from '@/constants';
+import { ACTIVITY_LIFECYCLE_STATUS_ENUM, TAB_ENUM, TABLE_ENUM } from '@/constants';
 import { useToast } from '@/context/ToastContext';
+import { AddActivityManualForm } from './AddActivityManualForm';
+import { TabMenu } from '@/components/TabMenu';
+import { RealDataForm } from '@/components/AddActivityForm/RealDataForm';
 
 type ActivityFormData = {
   userId: string;
@@ -41,6 +43,7 @@ export const AddActivityForm = ({ onSubmitCallback }: IAddActivityForm) => {
   const { handleMovieSelection, selectedMovies, clearSelection } = useMovieSelection({
     maxSelection: MAX_MOVIES_SELECTION,
   });
+  const [activeTab, setActiveTab] = useState<TAB_ENUM>(TAB_ENUM.REAL_DATA_FORM);
   const { showToast } = useToast();
 
   const {
@@ -132,29 +135,23 @@ export const AddActivityForm = ({ onSubmitCallback }: IAddActivityForm) => {
     <View style={styles.formContainer}>
       <FormSelect control={control} name="activityType" options={activityTypeOptions} />
 
-      <MovieSearch
-        selectedMovies={selectedMovies}
-        onMovieSelect={handleMovieSelection}
-        onClearSelection={clearSelection}
-        maxSelection={MAX_MOVIES_SELECTION}
+      <TabMenu
+        activeTab={activeTab}
+        handleActiveTabPress={(tab) => setActiveTab(tab)}
+        tabGroups={[TAB_ENUM.REAL_DATA_FORM, TAB_ENUM.MANUAL_FORM]}
       />
 
-      <DatePickerInput control={control} name="date" placeholder="Date" minimumDate={new Date()} />
-
-      <FormInput control={control} name="time" placeholder="Time" />
-      <FormInput control={control} name="place" placeholder="Place" />
-      <View style={styles.priceInputContainer}>
-        <View style={styles.pricePrefix}>
-          <Text style={styles.pricePrefixText}>RSD</Text>
-        </View>
-        <FormInput
+      {activeTab === TAB_ENUM.MANUAL_FORM ? (
+        <AddActivityManualForm
           control={control}
-          name="price"
-          placeholder="0"
-          keyboardType="numeric"
-          customStyle={styles.priceInput}
+          selectedMovies={selectedMovies}
+          onMovieSelect={handleMovieSelection}
+          onClearSelection={clearSelection}
+          maxSelection={MAX_MOVIES_SELECTION}
         />
-      </View>
+      ) : (
+        <RealDataForm />
+      )}
 
       <GradientButton
         text="Add activity"

@@ -38,7 +38,9 @@ export const useSearch = () => {
         return;
       }
 
-      const detailedMoviesPromises = movies.results.map(async (movie) => {
+      const sortedByPopularity = [...movies.results].sort((a, b) => b.popularity - a.popularity);
+
+      const detailedMoviesPromises = sortedByPopularity.map(async (movie) => {
         const movieDetail = await movieDB.getMovieById(movie.id);
         if (movieDetail) {
           return mapMovieDetails(movieDetail);

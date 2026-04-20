@@ -1,0 +1,1 @@
+export { MovieScheduleList } from './MovieScheduleList';

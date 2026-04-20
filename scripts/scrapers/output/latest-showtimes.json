@@ -1,0 +1,733 @@
+{
+  "generated_at": "2026-04-20T11:30:34.194Z",
+  "count": 23,
+  "items": [
+    {
+      "cinema_name": "CineStar",
+      "title": "The Mummy",
+      "source_title": "Mumija - film Lija Kronina",
+      "source_url": "https://cinestarcinemas.rs/zrenjanin-big",
+      "confidence": 0.9,
+      "notes": "Assumed to be The Mummy based on title context.",
+      "date": "20.04",
+      "times": [
+        "19:55",
+        "22:25"
+      ],
+      "schedule": [
+        {
+          "date": "20.04",
+          "times": [
+            "19:55",
+            "22:25"
+          ],
+          "day": "today"
+        },
+        {
+          "date": "21.04",
+          "times": [
+            "19:55",
+            "22:25"
+          ],
+          "day": "tomorrow"
+        },
+        {
+          "date": "22.04",
+          "times": [
+            "19:45",
+            "21:30"
+          ],
+          "day": "wednesday"
+        }
+      ],
+      "day": "today"
+    },
+    {
+      "cinema_name": "CineStar",
+      "title": "The Devil Wears Prada 2",
+      "source_title": "Đavo nosi Pradu 2 - CineLady Pretpremijera",
+      "source_url": "https://cinestarcinemas.rs/zrenjanin-big",
+      "confidence": 1,
+      "notes": "",
+      "date": "29.04",
+      "times": [
+        "20:00"
+      ],
+      "schedule": [
+        {
+          "date": "29.04",
+          "times": [
+            "20:00"
+          ],
+          "day": null
+        }
+      ],
+      "day": null
+    },
+    {
+      "cinema_name": "CineStar",
+      "title": "Michael",
+      "source_title": "Majkl Pretpremijera",
+      "source_url": "https://cinestarcinemas.rs/zrenjanin-big",
+      "confidence": 0.8,
+      "notes": "Assumed title, needs verification.",
+      "date": "22.04",
+      "times": [
+        "19:00"
+      ],
+      "schedule": [
+        {
+          "date": "22.04",
+          "times": [
+            "19:00"
+          ],
+          "day": null
+        },
+        {
+          "date": "23.04",
+          "times": [
+            "19:30"
+          ],
+          "day": null
+        },
+        {
+          "date": "24.04",
+          "times": [
+            "19:30"
+          ],
+          "day": "friday"
+        },
+        {
+          "date": "25.04",
+          "times": [
+            "19:30"
+          ],
+          "day": "saturday"
+        }
+      ],
+      "day": null
+    },
+    {
+      "cinema_name": "CineStar",
+      "title": "Michael Premiere",
+      "source_title": "Majkl Pretpremijera",
+      "source_url": "https://cinestarcinemas.rs/zrenjanin-big",
+      "confidence": 0.8,
+      "notes": "Uncertain title, working with literal translation.",
+      "date": "26.04",
+      "times": [
+        "19:30"
+      ],
+      "schedule": [
+        {
+          "date": "26.04",
+          "times": [
+            "19:30"
+          ],
+          "day": "sunday"
+        }
+      ],
+      "day": "sunday"
+    },
+    {
+      "cinema_name": "CineStar",
+      "title": "Mortal Kombat II",
+      "source_title": "Mortal Kombat II Pretpremijera",
+      "source_url": "https://cinestarcinemas.rs/zrenjanin-big",
+      "confidence": 1,
+      "notes": "Known official title.",
+      "date": "06.05",
+      "times": [
+        "19:00"
+      ],
+      "schedule": [
+        {
+          "date": "06.05",
+          "times": [
+            "19:00"
+          ],
+          "day": null
+        }
+      ],
+      "day": null
+    },
+    {
+      "cinema_name": "CineStar",
+      "title": "The Adventures of Pinocchio 2",
+      "source_title": "Finikove avanture 2",
+      "source_url": "https://cinestarcinemas.rs/zrenjanin-big",
+      "confidence": 0.9,
+      "notes": "Title adapted.",
+      "date": "20.04",
+      "times": [
+        "17:15"
+      ],
+      "schedule": [
+        {
+          "date": "20.04",
+          "times": [
+            "17:15"
+          ],
+          "day": "today"
+        },
+        {
+          "date": "21.04",
+          "times": [
+            "17:15"
+          ],
+          "day": "tomorrow"
+        },
+        {
+          "date": "22.04",
+          "times": [
+            "17:15"
+          ],
+          "day": "wednesday"
+        }
+      ],
+      "day": "today"
+    },
+    {
+      "cinema_name": "CineStar",
+      "title": "David",
+      "source_title": "David",
+      "source_url": "https://cinestarcinemas.rs/zrenjanin-big",
+      "confidence": 0.7,
+      "notes": "Uncertain title, kept original.",
+      "date": "23.04",
+      "times": [
+        "17:30"
+      ],
+      "schedule": [
+        {
+          "date": "23.04",
+          "times": [
+            "17:30"
+          ],
+          "day": null
+        },
+        {
+          "date": "24.04",
+          "times": [
+            "17:30"
+          ],
+          "day": null
+        },
+        {
+          "date": "25.04",
+          "times": [
+            "11:00",
+            "15:15",
+            "17:30"
+          ],
+          "day": "saturday"
+        },
+        {
+          "date": "26.04",
+          "times": [
+            "11:00",
+            "15:15",
+            "17:30"
+          ],
+          "day": "sunday"
+        }
+      ],
+      "day": null
+    },
+    {
+      "cinema_name": "CineStar",
+      "title": "The Magic Faraway Tree",
+      "source_title": "Magično daleko drvo",
+      "source_url": "https://cinestarcinemas.rs/zrenjanin-big",
+      "confidence": 1,
+      "notes": "",
+      "date": "20.04",
+      "times": [
+        "18:05"
+      ],
+      "schedule": [
+        {
+          "date": "20.04",
+          "times": [
+            "18:05"
+          ],
+          "day": "today"
+        },
+        {
+          "date": "21.04",
+          "times": [
+            "18:05"
+          ],
+          "day": "tomorrow"
+        },
+        {
+          "date": "22.04",
+          "times": [
+            "18:05"
+          ],
+          "day": "wednesday"
+        }
+      ],
+      "day": "today"
+    },
+    {
+      "cinema_name": "CineStar",
+      "title": "Sheep Detectives Pre-Premiere",
+      "source_title": "Ovce detektivi Pretpremijera",
+      "source_url": "https://cinestarcinemas.rs/zrenjanin-big",
+      "confidence": 0.9,
+      "notes": "",
+      "date": "01.05",
+      "times": [
+        "15:15"
+      ],
+      "schedule": [
+        {
+          "date": "01.05",
+          "times": [
+            "15:15"
+          ],
+          "day": null
+        },
+        {
+          "date": "02.05",
+          "times": [
+            "15:15"
+          ],
+          "day": null
+        },
+        {
+          "date": "03.05",
+          "times": [
+            "15:15"
+          ],
+          "day": "sunday"
+        }
+      ],
+      "day": null
+    },
+    {
+      "cinema_name": "CineStar",
+      "title": "Kill Bill: The Whole Bloody Affair",
+      "source_title": "Kill Bill: Cela krvava priča",
+      "source_url": "https://cinestarcinemas.rs/zrenjanin-big",
+      "confidence": 1,
+      "notes": "",
+      "date": "20.04",
+      "times": [
+        "20:10"
+      ],
+      "schedule": [
+        {
+          "date": "20.04",
+          "times": [
+            "20:10"
+          ],
+          "day": "today"
+        }
+      ],
+      "day": "today"
+    },
+    {
+      "cinema_name": "CineStar",
+      "title": "Kill Bill: Volume 1",
+      "source_title": "Kill Bill: Cela krvava priča",
+      "source_url": "https://cinestarcinemas.rs/zrenjanin-big",
+      "confidence": 1,
+      "notes": "",
+      "date": "21.04",
+      "times": [
+        "20:10"
+      ],
+      "schedule": [
+        {
+          "date": "21.04",
+          "times": [
+            "20:10"
+          ],
+          "day": "tomorrow"
+        },
+        {
+          "date": "22.04",
+          "times": [
+            "20:10"
+          ],
+          "day": "wednesday"
+        }
+      ],
+      "day": "tomorrow"
+    },
+    {
+      "cinema_name": "CineStar",
+      "title": "Solo in Italy",
+      "source_title": "Solo u Italiji",
+      "source_url": "https://cinestarcinemas.rs/zrenjanin-big",
+      "confidence": 0.8,
+      "notes": "",
+      "date": "20.04",
+      "times": [
+        "19:45"
+      ],
+      "schedule": [
+        {
+          "date": "20.04",
+          "times": [
+            "19:45"
+          ],
+          "day": "today"
+        },
+        {
+          "date": "21.04",
+          "times": [
+            "19:45"
+          ],
+          "day": "tomorrow"
+        },
+        {
+          "date": "22.04",
+          "times": [
+            "17:45"
+          ],
+          "day": "wednesday"
+        }
+      ],
+      "day": "today"
+    },
+    {
+      "cinema_name": "CineStar",
+      "title": "The Super Mario Bros. Movie",
+      "source_title": "Super Mario Galaktički Film",
+      "source_url": "https://cinestarcinemas.rs/zrenjanin-big",
+      "confidence": 1,
+      "notes": "",
+      "date": "20.04",
+      "times": [
+        "16:00",
+        "18:00"
+      ],
+      "schedule": [
+        {
+          "date": "20.04",
+          "times": [
+            "16:00",
+            "18:00"
+          ],
+          "day": "today"
+        },
+        {
+          "date": "21.04",
+          "times": [
+            "16:00",
+            "18:00"
+          ],
+          "day": "tomorrow"
+        },
+        {
+          "date": "22.04",
+          "times": [
+            "17:00"
+          ],
+          "day": "wednesday"
+        }
+      ],
+      "day": "today"
+    },
+    {
+      "cinema_name": "CineStar",
+      "title": "Drama",
+      "source_title": "Drama",
+      "source_url": "https://cinestarcinemas.rs/zrenjanin-big",
+      "confidence": 0.8,
+      "notes": "Uncertain if this title is used in English.",
+      "date": "20.04",
+      "times": [
+        "19:00"
+      ],
+      "schedule": [
+        {
+          "date": "20.04",
+          "times": [
+            "19:00"
+          ],
+          "day": "today"
+        },
+        {
+          "date": "21.04",
+          "times": [
+            "19:00"
+          ],
+          "day": "tomorrow"
+        },
+        {
+          "date": "22.04",
+          "times": [
+            "19:00"
+          ],
+          "day": "wednesday"
+        }
+      ],
+      "day": "today"
+    },
+    {
+      "cinema_name": "CineStar",
+      "title": "Project Desperate Attempt",
+      "source_title": "Projekat očajnički pokušaj",
+      "source_url": "https://cinestarcinemas.rs/zrenjanin-big",
+      "confidence": 1,
+      "notes": "",
+      "date": "20.04",
+      "times": [
+        "21:05"
+      ],
+      "schedule": [
+        {
+          "date": "20.04",
+          "times": [
+            "21:05"
+          ],
+          "day": "today"
+        },
+        {
+          "date": "21.04",
+          "times": [
+            "21:05"
+          ],
+          "day": "tomorrow"
+        },
+        {
+          "date": "22.04",
+          "times": [
+            "21:05"
+          ],
+          "day": "wednesday"
+        }
+      ],
+      "day": "today"
+    },
+    {
+      "cinema_name": "CineStar",
+      "title": "Harvest Proud of Domestic Film",
+      "source_title": "Žetva Ponosni na domaći film",
+      "source_url": "https://cinestarcinemas.rs/zrenjanin-big",
+      "confidence": 1,
+      "notes": "",
+      "date": "20.04",
+      "times": [
+        "21:45"
+      ],
+      "schedule": [
+        {
+          "date": "20.04",
+          "times": [
+            "21:45"
+          ],
+          "day": "today"
+        },
+        {
+          "date": "21.04",
+          "times": [
+            "21:45"
+          ],
+          "day": "tomorrow"
+        }
+      ],
+      "day": "today"
+    },
+    {
+      "cinema_name": "CineStar",
+      "title": "Harvest",
+      "source_title": "Žetva Ponosni na domaći film",
+      "source_url": "https://cinestarcinemas.rs/zrenjanin-big",
+      "confidence": 0.9,
+      "notes": "Official title used.",
+      "date": "22.04",
+      "times": [
+        "22:15"
+      ],
+      "schedule": [
+        {
+          "date": "22.04",
+          "times": [
+            "22:15"
+          ],
+          "day": "wednesday"
+        }
+      ],
+      "day": "wednesday"
+    },
+    {
+      "cinema_name": "CineStar",
+      "title": "Sports Heart",
+      "source_title": "Sportsko srce Ponosni na domaći film",
+      "source_url": "https://cinestarcinemas.rs/zrenjanin-big",
+      "confidence": 0.8,
+      "notes": "Title may not be officially recognized.",
+      "date": "20.04",
+      "times": [
+        "16:20"
+      ],
+      "schedule": [
+        {
+          "date": "20.04",
+          "times": [
+            "16:20"
+          ],
+          "day": "today"
+        },
+        {
+          "date": "21.04",
+          "times": [
+            "16:20"
+          ],
+          "day": "tomorrow"
+        },
+        {
+          "date": "22.04",
+          "times": [
+            "16:20"
+          ],
+          "day": "wednesday"
+        }
+      ],
+      "day": "today"
+    },
+    {
+      "cinema_name": "CineStar",
+      "title": "Wedding",
+      "source_title": "Svadba Ponosni na domaći film",
+      "source_url": "https://cinestarcinemas.rs/zrenjanin-big",
+      "confidence": 0.9,
+      "notes": "Official title used.",
+      "date": "20.04",
+      "times": [
+        "17:45"
+      ],
+      "schedule": [
+        {
+          "date": "20.04",
+          "times": [
+            "17:45"
+          ],
+          "day": "today"
+        },
+        {
+          "date": "21.04",
+          "times": [
+            "17:45"
+          ],
+          "day": "tomorrow"
+        }
+      ],
+      "day": "today"
+    },
+    {
+      "cinema_name": "CineStar",
+      "title": "Iron Maiden: Burning Ambition",
+      "source_title": "Iron Maiden: Burning Ambition Pretprodaja",
+      "source_url": "https://cinestarcinemas.rs/zrenjanin-big",
+      "confidence": 0.9,
+      "notes": "Official title used.",
+      "date": "07.05",
+      "times": [
+        "20:00"
+      ],
+      "schedule": [
+        {
+          "date": "07.05",
+          "times": [
+            "20:00"
+          ],
+          "day": null
+        }
+      ],
+      "day": null
+    },
+    {
+      "cinema_name": "CineStar",
+      "title": "Summer Wars",
+      "source_title": "Summer Wars Pretprodaja",
+      "source_url": "https://cinestarcinemas.rs/zrenjanin-big",
+      "confidence": 0.9,
+      "notes": "Official title used.",
+      "date": "09.05",
+      "times": [
+        "19:00"
+      ],
+      "schedule": [
+        {
+          "date": "09.05",
+          "times": [
+            "19:00"
+          ],
+          "day": null
+        },
+        {
+          "date": "10.05",
+          "times": [
+            "19:00"
+          ],
+          "day": null
+        }
+      ],
+      "day": null
+    },
+    {
+      "cinema_name": "CineStar",
+      "title": "Edge of Tomorrow",
+      "source_title": "All You Need Is Kill Pretprodaja",
+      "source_url": "https://cinestarcinemas.rs/zrenjanin-big",
+      "confidence": 1,
+      "notes": "Official English title used.",
+      "date": "30.05",
+      "times": [
+        "19:00"
+      ],
+      "schedule": [
+        {
+          "date": "30.05",
+          "times": [
+            "19:00"
+          ],
+          "day": null
+        },
+        {
+          "date": "31.05",
+          "times": [
+            "19:00"
+          ],
+          "day": null
+        }
+      ],
+      "day": null
+    },
+    {
+      "cinema_name": "CineStar",
+      "title": "The Girl Who Leapt Through Time",
+      "source_title": "The Girl Who Leapt Through Time Pretprodaja",
+      "source_url": "https://cinestarcinemas.rs/zrenjanin-big",
+      "confidence": 1,
+      "notes": "Official English title used.",
+      "date": "13.06",
+      "times": [
+        "19:00"
+      ],
+      "schedule": [
+        {
+          "date": "13.06",
+          "times": [
+            "19:00"
+          ],
+          "day": null
+        },
+        {
+          "date": "14.06",
+          "times": [
+            "19:00"
+          ],
+          "day": null
+        }
+      ],
+      "day": null
+    }
+  ]
+}
