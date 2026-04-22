@@ -1,18 +1,20 @@
-import { View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { styles } from './AddActivityForm.styles';
-import { GradientButton } from '@/components/elements';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { ACTIVITY_TYPES_ENUM } from '@/constants/activity-types';
 import { MappedMovie } from '@/types';
 import { useMovieSelection } from '@/hooks/useMovieSelection';
-import { FormSelect } from '@/components/elements/FormSelect';
 import { supabase } from '@/services/Supabase';
 import { ACTIVITY_LIFECYCLE_STATUS_ENUM, TAB_ENUM, TABLE_ENUM } from '@/constants';
 import { useToast } from '@/context/ToastContext';
 import { AddActivityManualForm } from './AddActivityManualForm';
 import { TabMenu } from '@/components/TabMenu';
-import { RealDataForm } from '@/components/AddActivityForm/RealDataForm';
+import {
+  CurrentMoviesInTheaters,
+  ISelectedShowtimePayload,
+} from '@/components/AddActivityForm/components/CurrentMoviesInTheaters/CurrentMoviesInTheaters';
+import { MovieDetails } from '@/components/MovieDetails/MovieDetails';
 
 type ActivityFormData = {
   userId: string;
@@ -43,7 +45,8 @@ export const AddActivityForm = ({ onSubmitCallback }: IAddActivityForm) => {
   const { handleMovieSelection, selectedMovies, clearSelection } = useMovieSelection({
     maxSelection: MAX_MOVIES_SELECTION,
   });
-  const [activeTab, setActiveTab] = useState<TAB_ENUM>(TAB_ENUM.REAL_DATA_FORM);
+  const [activeTab, setActiveTab] = useState<TAB_ENUM>(TAB_ENUM.ADD_ACTIVITY);
+  const [prefilledMovie, setPrefilledMovie] = useState<MappedMovie | null>(null);
   const { showToast } = useToast();
 
   const {
@@ -131,34 +134,73 @@ export const AddActivityForm = ({ onSubmitCallback }: IAddActivityForm) => {
     }
   };
 
+  const prefillActivityForm = async ({
+    movie,
+    time,
+    date,
+    cinemaName,
+  }: ISelectedShowtimePayload) => {
+    setValue('time', time);
+    setValue('place', cinemaName);
+
+    handleMovieSelection(movie);
+    setPrefilledMovie(movie);
+
+    if (date) {
+      const [dayPart, monthPart] = date.split('.');
+      if (dayPart && monthPart) {
+        const now = new Date();
+        const parsedDate = new Date(now.getFullYear(), Number(monthPart) - 1, Number(dayPart));
+        setValue('date', parsedDate.toISOString());
+      }
+    }
+
+    setActiveTab(TAB_ENUM.ADD_ACTIVITY);
+  };
+
+  const clearPrefilledSelection = () => {
+    clearSelection();
+    setPrefilledMovie(null);
+    setValue('activityData', null);
+    setValue('date', '');
+    setValue('time', '');
+    setValue('place', '');
+  };
+
   return (
     <View style={styles.formContainer}>
-      <FormSelect control={control} name="activityType" options={activityTypeOptions} />
+      {/*<FormSelect control={control} name="activityType" options={activityTypeOptions} />*/}
 
       <TabMenu
         activeTab={activeTab}
         handleActiveTabPress={(tab) => setActiveTab(tab)}
-        tabGroups={[TAB_ENUM.REAL_DATA_FORM, TAB_ENUM.MANUAL_FORM]}
+        tabGroups={[TAB_ENUM.NOW_SHOWING, TAB_ENUM.ADD_ACTIVITY]}
       />
 
-      {activeTab === TAB_ENUM.MANUAL_FORM ? (
+      {prefilledMovie && (
+        <>
+          <MovieDetails movie={prefilledMovie} />
+          <Pressable style={styles.clearPrefilledButton} onPress={clearPrefilledSelection}>
+            <Text style={styles.clearPrefilledButtonText}>Clear selected movie</Text>
+          </Pressable>
+        </>
+      )}
+
+      {activeTab === TAB_ENUM.ADD_ACTIVITY ? (
         <AddActivityManualForm
           control={control}
           selectedMovies={selectedMovies}
           onMovieSelect={handleMovieSelection}
-          onClearSelection={clearSelection}
+          onClearSelection={clearPrefilledSelection}
           maxSelection={MAX_MOVIES_SELECTION}
+          onSubmit={handleSubmit(onSubmit)}
+          isSubmitting={isSubmitting}
+          isDisabled={!isValid || isSubmitting}
+          shouldShowSearchBar={!prefilledMovie}
         />
       ) : (
-        <RealDataForm />
+        <CurrentMoviesInTheaters onSelectShowtime={prefillActivityForm} />
       )}
-
-      <GradientButton
-        text="Add activity"
-        onPress={handleSubmit(onSubmit)}
-        loading={isSubmitting}
-        disabled={!isValid || isSubmitting}
-      />
     </View>
   );
 };

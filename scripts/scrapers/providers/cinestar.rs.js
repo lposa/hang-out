@@ -5,6 +5,7 @@ const CINESTAR_URL = 'https://cinestarcinemas.rs/zrenjanin-big';
 const UI_NOISE_TITLES = new Set(['zanr', 'žanr', 'vise filtera', 'više filtera', 'filter', 'format']);
 const DAY_PATTERN =
   '(?:danas|sutra|ponedeljak|utorak|sreda|cetvrtak|četvrtak|petak|subota|nedelja|nedjelja)';
+const PREMIERE_TOKEN_PATTERN = /\b(pretpremijera|premijera|pretprodaja)\b/i;
 
 const clean = (value) => value?.replace(/\s+/g, ' ').trim() ?? '';
 const normalizeToken = (value) =>
@@ -61,11 +62,22 @@ const parseScheduleByDateFromDom = (card, $) => {
     );
 
     if (!dateText || times.length === 0) return;
-    schedules.push({ date: dateText, times });
+    const wrapperText = normalizeToken(wrapper.text());
+    schedules.push({
+      date: dateText,
+      times,
+      premiere: PREMIERE_TOKEN_PATTERN.test(wrapperText),
+    });
   });
 
   return schedules;
 };
+
+const normalizeTitleForGrouping = (title) =>
+  clean(title)
+    .replace(PREMIERE_TOKEN_PATTERN, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
 
 const titleFromMoviesImageUrl = (url) => {
   // Example:
@@ -136,6 +148,11 @@ async function scrapeCinestarShowtimes({ headless = true, url = CINESTAR_URL } =
         clean(card.find('h1, h2, h3, h4, [class*="title"], [class*="name"]').first().text()) ||
         clean(cardText.split('\n')[0]);
       const normalizedTitle = normalizeToken(title);
+      const normalizedBaseTitle = normalizeTitleForGrouping(title);
+      const genreText = clean(card.find('.age').first().text()).replace(/^Žanr:\s*/i, '') || null;
+      const runtimeText = clean(card.find('.duration').first().text()) || null;
+      const descriptionText = clean(card.find('.movie-desc p').first().text()) || null;
+      const isPremiereTitle = PREMIERE_TOKEN_PATTERN.test(normalizedTitle);
 
       if (!title || UI_NOISE_TITLES.has(normalizedTitle)) return;
       const schedulesFromDom = parseScheduleByDateFromDom(card, $);
@@ -152,18 +169,26 @@ async function scrapeCinestarShowtimes({ headless = true, url = CINESTAR_URL } =
         schedules.forEach((schedule) => {
           collected.push({
             cinema_name: 'CineStar',
-            title,
+            title: normalizedBaseTitle,
             date: schedule.date,
             times: schedule.times,
+            premiere: Boolean(schedule.premiere || isPremiereTitle),
+            genre: genreText,
+            runtime: runtimeText,
+            description: descriptionText,
             source_url: url,
           });
         });
       } else {
         collected.push({
           cinema_name: 'CineStar',
-          title,
+          title: normalizedBaseTitle,
           date: dateText,
           times,
+          premiere: isPremiereTitle,
+          genre: genreText,
+          runtime: runtimeText,
+          description: descriptionText,
           source_url: url,
         });
       }
@@ -178,6 +203,10 @@ async function scrapeCinestarShowtimes({ headless = true, url = CINESTAR_URL } =
           title,
           date: null,
           times: [],
+          premiere: false,
+          genre: null,
+          runtime: null,
+          description: null,
           source_url: url,
         });
       });

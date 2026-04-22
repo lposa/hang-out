@@ -5,6 +5,6 @@ export enum TABLE_ENUM {
   COMPATIBILITY_MATCHES = 'compatibility_matches',
   ACTIVITY_PARTICIPANTS = 'activity_participants',
   MESSAGES = 'messages',
-  CHAT_ROOM_PARTICIPANTS = 'chat_room_participants',
-  CHAT_ROOMS = 'chat_rooms',
+  CINEMA_SHOWTIMES = 'cinema_showtimes',
+  CINEMA_SHOWTIME_SCHEDULE_ENTRIES = 'cinema_showtime_schedule_entries',
 }

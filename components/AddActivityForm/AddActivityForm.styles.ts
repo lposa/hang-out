@@ -4,6 +4,22 @@ export const styles = StyleSheet.create({
   formContainer: {
     width: '100%',
   },
+  clearPrefilledButton: {
+    alignSelf: 'flex-start',
+    marginTop: 8,
+    marginBottom: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    backgroundColor: '#F8FAFC',
+  },
+  clearPrefilledButtonText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#334155',
+  },
   priceInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',

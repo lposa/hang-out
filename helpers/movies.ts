@@ -1,4 +1,5 @@
 import { MappedMovie, Movie, TMDBMovieDetailsResponse } from '@/types';
+import { IMovieDataDB } from '@/types/movies';
 
 export const getMoviePoster = (
   moviePosterPath: string | null,
@@ -21,6 +22,14 @@ export const mapMovie = (movie: Movie): MappedMovie => {
   };
 };
 
+export const mapMovieFromDB = (movie: IMovieDataDB): MappedMovie => {
+  return {
+    id: 0,
+    title: movie?.title,
+    image: getMoviePoster(movie?.moviePoster || ''),
+    overview: movie?.description || '',
+  };
+};
 export const mapMovieList = (movies: Movie[]): MappedMovie[] => movies.map(mapMovie);
 
 export const mapMovieDetails = (movie: TMDBMovieDetailsResponse): MappedMovie => {

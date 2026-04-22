@@ -26,6 +26,29 @@ export interface Movie {
   vote_count: number;
 }
 
+export interface IMovieDataDB {
+  cinema_name: string;
+  title: string;
+  source_title: string;
+  source_url: string;
+  confidence: number;
+  notes: string;
+  date: string | null;
+  day: string | null;
+  times?: string[];
+  schedule: {
+    date: string | null;
+    day: string | null;
+    times: string[];
+    premiere?: boolean;
+  }[];
+  premiere?: boolean;
+  genre?: string | null;
+  runtime?: string | null;
+  description?: string | null;
+  moviePoster?: string | null;
+}
+
 export interface TMDBMovieSearchResponse {
   page: number;
   results: Movie[];

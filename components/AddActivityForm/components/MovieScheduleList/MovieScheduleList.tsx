@@ -1,6 +1,9 @@
 import { Image, Pressable, Text, View } from 'react-native';
 import PLACEHOLDER_IMAGE from '@/assets/images/general-placeholder.png';
 import { styles } from './MovieScheduleList.styles';
+import { ISelectedShowtimePayload } from '@/components/AddActivityForm/components/CurrentMoviesInTheaters/CurrentMoviesInTheaters';
+import { mapMovieFromDB } from '@/helpers/movies';
+import { IMovieDataDB } from '@/types/movies';
 
 type MovieSchedule = {
   date: string | null;
@@ -8,44 +11,70 @@ type MovieSchedule = {
   times: string[];
 };
 
-type MovieScheduleItem = {
-  title: string;
-  moviePoster?: string | null;
-  schedule: MovieSchedule[];
-};
-
 interface IMovieScheduleList {
-  movies: MovieScheduleItem[];
+  movies: IMovieDataDB[];
+  onSelectShowtime?: (payload: ISelectedShowtimePayload) => void;
 }
 
-const getUniqueTimes = (schedule: MovieSchedule[]) =>
-  Array.from(new Set(schedule.flatMap((entry) => entry.times)));
+const getTimeEntries = (schedule: MovieSchedule[]) =>
+  schedule.flatMap((entry) =>
+    entry.times.map((time) => ({
+      time,
+      date: entry.date,
+      day: entry.day,
+    }))
+  );
 
-export const MovieScheduleList = ({ movies }: IMovieScheduleList) => (
-  <View style={styles.container}>
-    {movies.map((movie) => {
-      const times = getUniqueTimes(movie.schedule);
+export function MovieScheduleList({ movies, onSelectShowtime }: IMovieScheduleList) {
+  return (
+    <View style={styles.container}>
+      {movies.map((movie) => {
+        const timeEntries = getTimeEntries(movie.schedule);
 
-      return (
-        <View key={movie.title} style={styles.card}>
-          <Image
-            source={movie.moviePoster ? { uri: movie.moviePoster } : PLACEHOLDER_IMAGE}
-            style={styles.poster}
-          />
+        return (
+          <View key={movie.title} style={styles.card}>
+            <Image
+              source={movie.moviePoster ? { uri: movie.moviePoster } : PLACEHOLDER_IMAGE}
+              style={styles.poster}
+            />
 
-          <View style={styles.content}>
-            <Text style={styles.title}>{movie.title}</Text>
+            <View style={styles.content}>
+              {movie.premiere && (
+                <View style={styles.premiereBadge}>
+                  <Text style={styles.premiereBadgeText}>Premiere</Text>
+                </View>
+              )}
+              <Text style={styles.title}>{movie.title}</Text>
 
-            <View style={styles.timesContainer}>
-              {times.map((time) => (
-                <Pressable key={`${movie.title}-${time}`} style={styles.timePill}>
-                  <Text style={styles.timeText}>{time}</Text>
-                </Pressable>
-              ))}
+              {!!movie.description && (
+                <Text style={styles.description} numberOfLines={3}>
+                  {movie.description}
+                </Text>
+              )}
+
+              <View style={styles.timesContainer}>
+                {timeEntries.map((entry) => (
+                  <Pressable
+                    key={`${movie.title}-${entry.date ?? 'no-date'}-${entry.time}`}
+                    style={styles.timePill}
+                    onPress={() =>
+                      onSelectShowtime?.({
+                        movie: mapMovieFromDB(movie),
+                        time: entry.time,
+                        date: entry.date,
+                        day: entry.day,
+                        cinemaName: movie.cinema_name,
+                      })
+                    }
+                  >
+                    <Text style={styles.timeText}>{entry.time}</Text>
+                  </Pressable>
+                ))}
+              </View>
             </View>
           </View>
-        </View>
-      );
-    })}
-  </View>
-);
+        );
+      })}
+    </View>
+  );
+}

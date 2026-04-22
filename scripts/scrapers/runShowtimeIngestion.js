@@ -21,6 +21,7 @@ const UI_NOISE_TOKENS = new Set([
   'format',
   'zanrovi',
 ]);
+const PREMIERE_TOKEN_PATTERN = /\b(pretpremijera|premijera|pretprodaja)\b/i;
 
 const parseEnvFile = (filePath) => {
   if (!fs.existsSync(filePath)) return {};
@@ -111,11 +112,14 @@ const splitDateAndDay = (rawDate) => {
   return { date, day };
 };
 
+const canonicalTitleToken = (value) =>
+  toComparableToken((value ?? '').toString().replace(PREMIERE_TOKEN_PATTERN, '').trim());
+
 const groupByDateSchedule = (items) => {
   const grouped = new Map();
 
   items.forEach((item) => {
-    const titleKey = toComparableToken(item.title || item.source_title);
+    const titleKey = canonicalTitleToken(item.title || item.source_title);
     const groupKey = `${item.cinema_name}|${item.source_url}|${titleKey}`;
     const existing = grouped.get(groupKey);
 
@@ -127,6 +131,9 @@ const groupByDateSchedule = (items) => {
         source_url: item.source_url,
         confidence: item.confidence ?? null,
         notes: item.notes ?? '',
+        genre: item.genre ?? null,
+        runtime: item.runtime ?? null,
+        description: item.description ?? null,
         scheduleMap: new Map(),
       });
     }
@@ -134,17 +141,21 @@ const groupByDateSchedule = (items) => {
     const target = grouped.get(groupKey);
     const normalizedDateInfo = splitDateAndDay(item.date);
     const dateKey = normalizedDateInfo.date;
-    const existingTimes = target.scheduleMap.get(dateKey) ?? [];
-    target.scheduleMap.set(dateKey, normalizeTimes([...existingTimes, ...(item.times ?? [])]));
+    const existingEntry = target.scheduleMap.get(dateKey) ?? { times: [], premiere: false };
+    target.scheduleMap.set(dateKey, {
+      times: normalizeTimes([...existingEntry.times, ...(item.times ?? [])]),
+      premiere: Boolean(existingEntry.premiere || item.premiere),
+    });
   });
 
   return Array.from(grouped.values()).map((item) => {
-    const schedule = Array.from(item.scheduleMap.entries()).map(([date, times]) => {
+    const schedule = Array.from(item.scheduleMap.entries()).map(([date, scheduleData]) => {
       const dayInfo = splitDateAndDay(date);
       return {
         date: dayInfo.date,
         day: dayInfo.day,
-        times,
+        premiere: scheduleData.premiere,
+        times: scheduleData.times,
       };
     });
     const firstSchedule = schedule[0] ?? { date: null, day: null, times: [] };
@@ -155,8 +166,12 @@ const groupByDateSchedule = (items) => {
       source_url: item.source_url,
       confidence: item.confidence,
       notes: item.notes,
+      genre: item.genre,
+      runtime: item.runtime,
+      description: item.description,
       date: firstSchedule.date,
       day: firstSchedule.day,
+      premiere: Boolean(firstSchedule.premiere),
       times: firstSchedule.times,
       schedule,
     };

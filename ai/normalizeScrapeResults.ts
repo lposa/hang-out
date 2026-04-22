@@ -6,14 +6,22 @@ type ScrapedData = {
   date: string | null;
   times: string[];
   source_url: string;
+  premiere?: boolean;
+  genre?: string | null;
+  runtime?: string | null;
+  description?: string | null;
 };
 
 type NormalizedRecord = {
   source_title: string;
-  movie_title_en: string;
+  title: string;
   cinema_name: string;
   show_date: string | null;
   show_times: string[];
+  premiere?: boolean;
+  genre?: string | null;
+  runtime?: string | null;
+  description?: string | null;
   confidence: number;
   notes: string;
 };
@@ -35,7 +43,10 @@ const chunk = <T>(items: T[], size: number): T[][] => {
   return chunks;
 };
 
-const normalizeChunkWithAI = async (client: OpenAI, items: ScrapedData[]): Promise<NormalizedRecord[]> => {
+const normalizeChunkWithAI = async (
+  client: OpenAI,
+  items: ScrapedData[]
+): Promise<NormalizedRecord[]> => {
   const response = await client.chat.completions.create({
     model: 'gpt-4o-mini',
     response_format: { type: 'json_object' },
@@ -49,10 +60,14 @@ Return only valid JSON with:
   "records": [
     {
       "source_title": string,
-      "movie_title_en": string,
+      "title": string,
       "cinema_name": string,
       "show_date": string | null,
       "show_times": string[],
+      "premiere": boolean,
+      "genre": string | null,
+      "runtime": string | null,
+      "description": string | null,
       "confidence": number,
       "notes": string
     }
@@ -66,18 +81,22 @@ Return only valid JSON with:
 Normalize this array.
 
 Rules:
-- Use the official/international English release title for each movie when known.
-- Do not do literal translation if the movie has a known official English title.
-- If uncertain, keep source_title as movie_title_en and reduce confidence.
+- Use the official/international English release title.
+- If source_title is already in English, keep it unchanged as title.
+- Never return literal translations.
+- Remove marketing labels from title (e.g., premiere/pre-sale markers) and map to base official title.
+- If uncertain, keep source_title as title and reduce confidence.
 - Never invent dates. If no date is present in input, return null.
 - Normalize show_times to HH:mm (24h) if provided.
+- Preserve/return metadata fields (premiere, genre, runtime, description) from input when present.
+- Remove the duplicate entries in the output.
 
 Input:
 ${JSON.stringify(items, null, 2)}
         `.trim(),
       },
     ],
-    max_tokens: 1200,
+    max_tokens: 2000,
   });
 
   const raw = response.choices[0]?.message?.content?.trim() ?? '';
@@ -85,7 +104,12 @@ ${JSON.stringify(items, null, 2)}
     throw new Error('Empty AI normalization response');
   }
 
-  const parsed = JSON.parse(raw) as NormalizeResult;
+  const cleaned = raw
+    .replace(/^```json\s*/i, '')
+    .replace(/^```\s*/i, '')
+    .replace(/\s*```$/, '');
+
+  const parsed = JSON.parse(cleaned) as NormalizeResult;
   if (!parsed?.records || !Array.isArray(parsed.records)) {
     throw new Error('AI response missing records array');
   }
@@ -101,8 +125,10 @@ export async function normalizeScrapeResults(scrapedData: ScrapedData[]) {
     }
 
     const openai = new OpenAI({ apiKey });
-    const chunks = chunk(scrapedData, 8);
-    const normalizedChunks = await Promise.all(chunks.map((items) => normalizeChunkWithAI(openai, items)));
+    const chunks = chunk(scrapedData, 5);
+    const normalizedChunks = await Promise.all(
+      chunks.map((items) => normalizeChunkWithAI(openai, items))
+    );
     const parsedRecords = normalizedChunks.flat();
 
     const sourceByTitle = scrapedData.reduce<Map<string, ScrapedData[]>>((acc, item) => {
@@ -122,9 +148,13 @@ export async function normalizeScrapeResults(scrapedData: ScrapedData[]) {
 
       return {
         cinema_name: record.cinema_name || original?.cinema_name || 'Unknown cinema',
-        title: record.movie_title_en || record.source_title || original?.title || '',
+        title: record.title || record.source_title || original?.title || '',
         date: original?.date ?? null,
         times: normalizeTimes(original?.times ?? []),
+        premiere: Boolean(record.premiere ?? original?.premiere ?? false),
+        genre: record.genre ?? original?.genre ?? null,
+        runtime: record.runtime ?? original?.runtime ?? null,
+        description: record.description ?? original?.description ?? null,
         source_url: original?.source_url ?? '',
         source_title: record.source_title || original?.title || '',
         confidence: record.confidence ?? null,

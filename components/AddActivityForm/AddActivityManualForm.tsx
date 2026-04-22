@@ -1,6 +1,6 @@
 import { View, Text } from 'react-native';
 import { Control } from 'react-hook-form';
-import { DatePickerInput, FormInput } from '@/components/elements';
+import { DatePickerInput, FormInput, GradientButton } from '@/components/elements';
 import { MovieSearch } from '@/components/Search';
 import { MappedMovie } from '@/types';
 import { styles } from './AddActivityForm.styles';
@@ -11,6 +11,10 @@ interface IAddActivityManualForm {
   onMovieSelect: (movie: MappedMovie) => void;
   onClearSelection: () => void;
   maxSelection: number;
+  onSubmit: () => void;
+  isSubmitting: boolean;
+  isDisabled: boolean;
+  shouldShowSearchBar: boolean;
 }
 
 export const AddActivityManualForm = ({
@@ -19,14 +23,20 @@ export const AddActivityManualForm = ({
   onMovieSelect,
   onClearSelection,
   maxSelection,
+  onSubmit,
+  isSubmitting,
+  isDisabled,
+  shouldShowSearchBar,
 }: IAddActivityManualForm) => (
   <>
-    <MovieSearch
-      selectedMovies={selectedMovies}
-      onMovieSelect={onMovieSelect}
-      onClearSelection={onClearSelection}
-      maxSelection={maxSelection}
-    />
+    {shouldShowSearchBar && (
+      <MovieSearch
+        selectedMovies={selectedMovies}
+        onMovieSelect={onMovieSelect}
+        onClearSelection={onClearSelection}
+        maxSelection={maxSelection}
+      />
+    )}
 
     <DatePickerInput control={control} name="date" placeholder="Date" minimumDate={new Date()} />
 
@@ -44,5 +54,12 @@ export const AddActivityManualForm = ({
         customStyle={styles.priceInput}
       />
     </View>
+
+    <GradientButton
+      text="Add activity"
+      onPress={onSubmit}
+      loading={isSubmitting}
+      disabled={isDisabled}
+    />
   </>
 );
