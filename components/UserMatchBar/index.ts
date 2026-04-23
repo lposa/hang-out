@@ -1,0 +1,1 @@
+export { UserMatchBar } from './UserMatchBar';

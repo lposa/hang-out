@@ -14,6 +14,7 @@ export interface IParticipantProfile {
 
 export interface IPendingActivityParticipant {
   id: string;
+  guest_user_id: string;
   status: PARTICIPANT_STATUS_ENUM;
   user: IParticipantProfile;
 }

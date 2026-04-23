@@ -244,7 +244,6 @@ export const ActivityCard = ({
           <PendingRequests
             pendingRequests={pendingRequests}
             handleOpenProfile={handleOpenProfile}
-            activityId={activityId}
             handleMangeRequestStatus={handleManageRequestStatus}
           />
         )}

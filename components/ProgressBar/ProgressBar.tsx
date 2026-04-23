@@ -1,5 +1,6 @@
-import { View } from 'react-native';
+import { Text, View } from 'react-native';
 import { styles } from './ProgressBar.styles';
+import Svg, { Circle } from 'react-native-svg';
 
 export const getColorForPercentage = (percent: number): string => {
   if (percent <= 10) return '#FF0000';
@@ -14,9 +15,61 @@ export const getColorForPercentage = (percent: number): string => {
   return '#00FF00';
 };
 
-export const ProgressBar = ({ match }: { match: number }) => {
+export enum PROGRESS_BAR_VARIANT_ENUM {
+  LINEAR = 'linear',
+  CIRCULAR = 'circular',
+}
+
+interface IProgressBarProps {
+  match: number;
+  variant?: PROGRESS_BAR_VARIANT_ENUM;
+}
+
+export const ProgressBar = ({
+  match,
+  variant = PROGRESS_BAR_VARIANT_ENUM.LINEAR,
+}: IProgressBarProps) => {
   const clampedMatch = Math.min(Math.max(match || 0, 0), 100);
   const progressColor = getColorForPercentage(clampedMatch);
+
+  if (variant === PROGRESS_BAR_VARIANT_ENUM.CIRCULAR) {
+    const size = 48;
+    const strokeWidth = 6;
+    const radius = (size - strokeWidth) / 2;
+    const circumference = 2 * Math.PI * radius;
+    const strokeDashoffset = circumference * (1 - clampedMatch / 100);
+
+    return (
+      <View style={styles.circularWrapper}>
+        <Svg width={size} height={size}>
+          <Circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            stroke="#D1D5DB"
+            strokeWidth={strokeWidth}
+            fill="transparent"
+          />
+          <Circle
+            cx={size / 2}
+            cy={size / 2}
+            r={radius}
+            stroke={progressColor}
+            strokeWidth={strokeWidth}
+            fill="transparent"
+            strokeLinecap="round"
+            strokeDasharray={`${circumference} ${circumference}`}
+            strokeDashoffset={strokeDashoffset}
+            transform={`rotate(-90 ${size / 2} ${size / 2})`}
+          />
+        </Svg>
+        <View style={styles.circularCenterLabel}>
+          <Text style={styles.circularPercentText}>{Math.round(clampedMatch)}%</Text>
+        </View>
+      </View>
+    );
+  }
+
   const numberOfSquares = Math.floor(clampedMatch / 10);
 
   return (

@@ -25,4 +25,22 @@ export const styles = StyleSheet.create({
     flex: 1,
     height: 20,
   },
+  circularWrapper: {
+    width: 50,
+    height: 50,
+    marginTop: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
+  },
+  circularCenterLabel: {
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  circularPercentText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#111827',
+  },
 });

@@ -1,7 +1,7 @@
 import { Pressable, Text, View } from 'react-native';
 import { styles } from './ActivityPosterDetails.styles';
 import { ProgressBar } from '@/components/ProgressBar/ProgressBar';
-import { useProfile } from '@/hooks';
+import { useCalculateUserMatch, useProfile } from '@/hooks';
 import { useState, useEffect } from 'react';
 import { analyzeMatch } from '@/ai';
 import { supabase } from '@/services/Supabase';
@@ -9,6 +9,7 @@ import { TABLE_ENUM } from '@/constants';
 import { Ionicons } from '@expo/vector-icons';
 import { LoaderSpinner } from '@/components/elements/LoaderSpinner';
 import { ProfileTopTenMoviesRow } from '@/hooks/useProfile';
+import { UserMatchBar } from '@/components/UserMatchBar';
 
 interface IActivityPosterProps {
   name: string;
@@ -38,86 +39,10 @@ export const ActivityPosterDetails = ({
   userId,
   category = 'movies',
 }: IActivityPosterProps) => {
-  const { getTopTenMovies, getUserDataById } = useProfile();
-  const [matchScore, setMatchScore] = useState<number | undefined>(undefined);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    checkExistingMatch();
-  }, [userId, category]);
-
-  const checkExistingMatch = async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data } = await supabase
-      .from(TABLE_ENUM.COMPATIBILITY_MATCHES)
-      .select('score')
-      .eq('user_id', user.id)
-      .eq('target_user_id', userId)
-      .eq('category', category)
-      .single();
-
-    if (data) {
-      setMatchScore(data.score);
-    }
-  };
-
-  const calculateUserMatch = async () => {
-    setLoading(true);
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) return;
-
-      let aiResult = null;
-
-      if (category === 'movies') {
-        const [currentUserMovies, activityPosterMovies] = await Promise.all([
-          getTopTenMovies(),
-          getUserDataById(userId, 'top_ten_movies'),
-        ]);
-
-        if (!currentUserMovies || !activityPosterMovies) return;
-
-        const { result } = await analyzeMatch(
-          currentUserMovies,
-          activityPosterMovies as ProfileTopTenMoviesRow
-        );
-        aiResult = result;
-      }
-      //TODO: add more categories when needed
-      // else if (category === 'books') { ... call analyzeBookMatch ... }
-
-      if (aiResult) {
-        setMatchScore(aiResult.compatibility_score);
-
-        const matchData = {
-          user_id: user.id,
-          target_user_id: userId,
-          category: category,
-          score: aiResult.compatibility_score,
-          shared_items: aiResult.shared_movies,
-          shared_tags: aiResult.shared_genres,
-          notes: aiResult.notes,
-          updated_at: new Date(),
-        };
-
-        const { error: dbError } = await supabase
-          .from('compatibility_matches')
-          .upsert(matchData, { onConflict: 'user_id, target_user_id, category' });
-
-        if (dbError) console.error('Error saving match:', dbError);
-      }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { loading, calculateUserMatch, matchScore } = useCalculateUserMatch({
+    userId,
+    category,
+  });
 
   return (
     <View style={styles.activityPosterDetailsContainer}>
@@ -131,32 +56,12 @@ export const ActivityPosterDetails = ({
         </View>
       </View>
 
-      <View style={styles.matchContainer}>
-        {matchScore !== undefined ? (
-          <>
-            <Text style={styles.matchScoreText}>Compatibility: {Math.floor(matchScore)}%</Text>
-            <ProgressBar match={matchScore} />
-          </>
-        ) : (
-          <Pressable
-            style={[styles.calculateButton, loading && styles.calculateButtonDisabled]}
-            onPress={calculateUserMatch}
-            disabled={loading}
-          >
-            {loading ? (
-              <View style={styles.calculateButtonContent}>
-                <LoaderSpinner size={14} color="#FFFFFF" />
-                <Text style={styles.calculateButtonText}>Calculating...</Text>
-              </View>
-            ) : (
-              <View style={styles.calculateButtonContent}>
-                <Ionicons name="heart-outline" size={14} color="#FFFFFF" />
-                <Text style={styles.calculateButtonText}>Calculate match</Text>
-              </View>
-            )}
-          </Pressable>
-        )}
-      </View>
+      <UserMatchBar
+        matchScore={matchScore}
+        calculateUserMatch={calculateUserMatch}
+        loading={loading}
+        externalStyles={{ backgroundColor: '#E5F0FF' }}
+      />
     </View>
   );
 };
