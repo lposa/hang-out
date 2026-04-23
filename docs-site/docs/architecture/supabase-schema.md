@@ -14,6 +14,8 @@ This is the data model currently implied by application code.
 - `activity_participants`
 - `compatibility_matches`
 - `messages`
+- `cinema_showtimes`
+- `cinema_showtime_schedule_entries`
 - `chat_rooms` *(declared in enum, not actively used in current flows)*
 - `chat_room_participants` *(declared in enum, not actively used in current flows)*
 
@@ -73,6 +75,34 @@ erDiagram
     timestamptz created_at
   }
 
+  CINEMA_SHOWTIMES {
+    uuid id PK
+    text cinema_name
+    text title
+    text source_title
+    text source_url
+    numeric confidence
+    text notes
+    text date
+    text day
+    boolean premiere
+    text genre
+    text runtime
+    text description
+    timestamptz created_at
+    timestamptz updated_at
+  }
+
+  CINEMA_SHOWTIME_SCHEDULE_ENTRIES {
+    uuid id PK
+    uuid cinema_showtime_id FK
+    text date
+    text day
+    text[] times
+    boolean premiere
+    timestamptz created_at
+  }
+
   PROFILES ||--o{ ACTIVITIES : "hosts (activities.user_id)"
   PROFILES ||--o{ ACTIVITY_PARTICIPANTS : "joins (guest_user_id)"
   ACTIVITIES ||--o{ ACTIVITY_PARTICIPANTS : "has participants"
@@ -80,6 +110,7 @@ erDiagram
   PROFILES ||--o{ COMPATIBILITY_MATCHES : "target (target_user_id)"
   PROFILES ||--o{ MESSAGES : "sends"
   ACTIVITIES ||--o{ MESSAGES : "contains chat"
+  CINEMA_SHOWTIMES ||--o{ CINEMA_SHOWTIME_SCHEDULE_ENTRIES : "has schedule entries"
 ```
 
 ## Important constraints implied by code

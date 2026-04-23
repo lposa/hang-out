@@ -17,6 +17,7 @@ const sidebars: SidebarsConfig = {
         'flows/activity-lifecycle',
         'flows/ai-match',
         'flows/chat',
+        'flows/current-movies-in-theaters',
       ],
     },
     {
