@@ -9,8 +9,6 @@ import { Href, router } from 'expo-router';
 import { PARTICIPANT_STATUS_ENUM } from './types';
 import { useActivity } from '@/components/ActivityCard/hooks/useActivity';
 import { AcceptedRequests, PendingRequests } from '@/components/ActivityCard/components';
-import { useProfile } from '@/hooks';
-import { useEffect, useState } from 'react';
 import { ACTIVITY_LIFECYCLE_STATUS_ENUM } from '@/constants';
 
 interface IActivityCardProps {
@@ -73,13 +71,11 @@ export const ActivityCard = ({
     place,
     price,
     status,
+    avatar,
   } = activityData;
 
   const normalizedActivityStatus = status ?? ACTIVITY_LIFECYCLE_STATUS_ENUM.PENDING;
   const isCompleted = normalizedActivityStatus === ACTIVITY_LIFECYCLE_STATUS_ENUM.COMPLETED;
-
-  const { getUserDataById } = useProfile();
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   const {
     pendingRequests,
@@ -116,18 +112,6 @@ export const ActivityCard = ({
 
   const statusPill = getStatusPill();
 
-  useEffect(() => {
-    if (!isCurrentUserActivity && hostUserId) {
-      const fetchAvatar = async () => {
-        const profileData = await getUserDataById(hostUserId, '*');
-        if (profileData && 'image' in profileData) {
-          setAvatarUrl((profileData as { image?: string }).image || null);
-        }
-      };
-      fetchAvatar();
-    }
-  }, [hostUserId, isCurrentUserActivity, getUserDataById]);
-
   const handleOpenProfile = (profileId: string) => {
     router.push(`/(profile)/profile-screen/${profileId}` as Href);
   };
@@ -146,7 +130,7 @@ export const ActivityCard = ({
             onPress={() => handleOpenProfile(hostUserId)}
           >
             <AvatarWithInitials
-              avatarUrl={avatarUrl}
+              avatarUrl={avatar}
               firstName={first_name}
               lastName={last_name}
               size={100}

@@ -15,6 +15,7 @@ export type Activity = {
   price: string;
   created_at: string;
   status?: ACTIVITY_LIFECYCLE_STATUS_ENUM;
+  avatar?: string;
 };
 
 export type MatchCategory = 'movies' | 'books' | 'tv_shows';

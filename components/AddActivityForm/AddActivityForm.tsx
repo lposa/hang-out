@@ -84,7 +84,7 @@ export const AddActivityForm = ({ onSubmitCallback }: IAddActivityForm) => {
 
     const { data: profile } = await supabase
       .from(TABLE_ENUM.PROFILES)
-      .select('first_name, last_name')
+      .select('first_name, last_name, avatar')
       .eq('id', user.id)
       .single();
 
@@ -99,6 +99,7 @@ export const AddActivityForm = ({ onSubmitCallback }: IAddActivityForm) => {
       time: formData.time,
       place: formData.place,
       price: formData.price,
+      avatar: profile?.avatar ?? null,
     };
 
     const { data: createdActivity, error } = await supabase

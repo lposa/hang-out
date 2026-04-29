@@ -9,6 +9,30 @@ import { useToast } from '@/context/ToastContext';
 import { activityService } from '@/services';
 import { resolveSignedAvatarUri } from '@/helpers';
 
+const filterActivityParticipants = (
+  participants: IPendingActivityParticipant[],
+  status: PARTICIPANT_STATUS_ENUM
+) => {
+  return participants.filter((participant) => participant.status === status);
+};
+
+const mapFilteredParticipants = async (filteredParticipants: IPendingActivityParticipant[]) => {
+  return await Promise.all(
+    filteredParticipants.map(async (item) => {
+      const avatarPath = (item.user as unknown as { avatar?: string | null }).avatar ?? null;
+      const signedAvatarUrl = await resolveSignedAvatarUri(avatarPath);
+
+      return {
+        ...item,
+        user: {
+          ...item.user,
+          avatar: signedAvatarUrl ?? null,
+        },
+      };
+    })
+  );
+};
+
 export const useActivity = ({
   isCurrentUserActivity,
   activityId,
@@ -101,45 +125,21 @@ export const useActivity = ({
     } else {
       const typedData = data as unknown as IPendingActivityParticipant[];
 
-      const filteredPending = typedData.filter(
-        (item) => item.status === PARTICIPANT_STATUS_ENUM.PENDING
+      const filteredPending = filterActivityParticipants(
+        typedData,
+        PARTICIPANT_STATUS_ENUM.PENDING
       );
 
-      const pendingWithAvatars = await Promise.all(
-        filteredPending.map(async (item) => {
-          const avatarPath = (item.user as unknown as { avatar?: string | null }).avatar ?? null;
-          const signedAvatarUrl = await resolveSignedAvatarUri(avatarPath);
-
-          return {
-            ...item,
-            user: {
-              ...item.user,
-              avatar_url: signedAvatarUrl ?? null,
-            },
-          };
-        })
-      );
+      const pendingWithAvatars = await mapFilteredParticipants(filteredPending);
 
       setPendingRequests(pendingWithAvatars);
 
-      const filteredAccepted = typedData.filter(
-        (item) => item.status === PARTICIPANT_STATUS_ENUM.ACCEPTED
+      const filteredAccepted = filterActivityParticipants(
+        typedData,
+        PARTICIPANT_STATUS_ENUM.ACCEPTED
       );
 
-      const acceptedWithAvatars = await Promise.all(
-        filteredAccepted.map(async (item) => {
-          const avatarPath = (item.user as unknown as { avatar?: string | null }).avatar ?? null;
-          const signedAvatarUrl = await resolveSignedAvatarUri(avatarPath);
-
-          return {
-            ...item,
-            user: {
-              ...item.user,
-              avatar_url: signedAvatarUrl ?? null,
-            },
-          };
-        })
-      );
+      const acceptedWithAvatars = await mapFilteredParticipants(filteredAccepted);
 
       setAcceptedParticipants(acceptedWithAvatars);
     }

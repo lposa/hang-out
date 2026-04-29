@@ -1,6 +1,7 @@
 import { supabase } from '@/services/Supabase';
 import { ACTIVITY_LIFECYCLE_STATUS_ENUM, TABLE_ENUM } from '@/constants';
 import { Activity } from '@/types/activity';
+import { resolveSignedAvatarUri } from '@/helpers';
 
 export class ActivityService {
   private async fetchStatusesByActivityIds(activityIds: string[]) {
@@ -39,10 +40,16 @@ export class ActivityService {
     const filtered = data?.filter((row) => row.user_id !== user.id) ?? [];
     const statusByActivityId = await this.fetchStatusesByActivityIds(filtered.map((a) => a.id));
 
-    return filtered.map((activity) => ({
-      ...activity,
-      status: statusByActivityId[activity.id],
-    }));
+    return Promise.all(
+      filtered.map(async (activity) => {
+        const resolvedAvatar = await resolveSignedAvatarUri(activity.avatar ?? null);
+        return {
+          ...activity,
+          avatar: resolvedAvatar ?? activity.avatar,
+          status: statusByActivityId[activity.id],
+        };
+      })
+    );
   }
 
   async fetchCurrentUserActivities(): Promise<Activity[]> {
@@ -63,10 +70,16 @@ export class ActivityService {
     const rows = data ?? [];
     const statusByActivityId = await this.fetchStatusesByActivityIds(rows.map((a) => a.id));
 
-    return rows.map((activity) => ({
-      ...activity,
-      status: statusByActivityId[activity.id],
-    }));
+    return Promise.all(
+      rows.map(async (activity) => {
+        const resolvedAvatar = await resolveSignedAvatarUri(activity.avatar ?? null);
+        return {
+          ...activity,
+          avatar: resolvedAvatar ?? activity.avatar,
+          status: statusByActivityId[activity.id],
+        };
+      })
+    );
   }
 
   async updateActivityStatus(
