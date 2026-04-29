@@ -36,9 +36,9 @@ export const PendingRequestsItem = ({
           <Pressable onPress={() => handleOpenProfile(pendingRequest.user.id)}>
             <Image
               source={
-                pendingRequest.user.avatar_url
-                  ? { uri: pendingRequest.user.avatar_url }
-                  : require('@/assets/images/leonard_posa.jpeg')
+                pendingRequest.user.avatar
+                  ? { uri: pendingRequest.user.avatar }
+                  : require('@/assets/images/profile-placeholder.png')
               }
               style={styles.requestUserAvatar}
             />

@@ -6,6 +6,6 @@ export type Profile = {
   last_name: string;
   birthday: string | null;
   top_ten_movies?: MappedMovie[] | undefined;
-  image?: string;
+  avatar?: string;
   updated_at?: Date;
 };

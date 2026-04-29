@@ -16,7 +16,7 @@ export const ProfileDisplay = ({ profile, onEdit }: IProfileDisplay) => {
       <ProfileCard
         name={`${profile.first_name} ${profile.last_name}`}
         birthday={profile.birthday}
-        imageSrc={profile.image}
+        imageSrc={profile.avatar}
         onEdit={onEdit ? () => onEdit(SCREEN_MODE_ENUM.EDIT) : undefined}
       />
 

@@ -4,6 +4,30 @@ export const styles = StyleSheet.create({
   profileFormContainer: {
     paddingHorizontal: 20,
   },
+  imageSection: {
+    alignItems: 'center',
+    marginBottom: 16,
+    gap: 10,
+  },
+  profileImagePreview: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    backgroundColor: '#E5E7EB',
+  },
+  uploadImageButton: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    backgroundColor: '#FFFFFF',
+  },
+  uploadImageButtonText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#334155',
+  },
   headerText: {
     fontSize: 24,
     textAlign: 'center',

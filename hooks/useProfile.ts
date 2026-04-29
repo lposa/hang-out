@@ -2,6 +2,7 @@ import { TABLE_ENUM } from '@/constants';
 import { supabase } from '@/services/Supabase';
 import { MappedMovie, Profile } from '@/types';
 import { useEffect, useState } from 'react';
+import { extractAvatarObjectPath, resolveSignedAvatarUri } from '@/helpers';
 
 export type ProfileTopTenMoviesRow = {
   top_ten_movies: MappedMovie[];
@@ -36,7 +37,29 @@ export const useProfile = () => {
       }
 
       if (data) {
-        setProfile(data);
+        let avatarValue = data.avatar;
+        let avatarObjectPath: string | null = null;
+
+        if (avatarValue && avatarValue.startsWith('http')) {
+          avatarObjectPath = extractAvatarObjectPath(avatarValue);
+
+          if (avatarObjectPath && avatarObjectPath !== avatarValue) {
+            const { error: updateError } = await supabase
+              .from(TABLE_ENUM.PROFILES)
+              .update({ avatar: avatarObjectPath })
+              .eq('id', user.id);
+
+            if (updateError) {
+              console.error('Error migrating avatar value:', updateError);
+            }
+          }
+        }
+
+        const avatarUrl = await resolveSignedAvatarUri(avatarObjectPath ?? avatarValue);
+        setProfile({
+          ...data,
+          avatar: avatarUrl ?? data.avatar,
+        });
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -71,7 +94,7 @@ export const useProfile = () => {
       }
 
       if (data) {
-        return data;
+        return data as ProfileTopTenMoviesRow;
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -98,8 +121,17 @@ export const useProfile = () => {
         throw error;
       }
 
+      if (dataType === '*' && data) {
+        const profileData = data as Profile;
+        const avatarUrl = await resolveSignedAvatarUri(profileData.avatar ?? '');
+        return {
+          ...profileData,
+          avatar: avatarUrl ?? profileData.avatar,
+        };
+      }
+
       if (data) {
-        return data;
+        return data as ProfileTopTenMoviesRow;
       }
     } catch (error) {
       console.error('Error fetching profile:', error);

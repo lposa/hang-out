@@ -9,7 +9,7 @@ export interface IParticipantProfile {
   id: string;
   first_name: string;
   last_name: string;
-  avatar_url: string | null;
+  avatar: string | null;
 }
 
 export interface IPendingActivityParticipant {

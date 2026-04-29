@@ -14,6 +14,8 @@ import {
 } from '@/components/Chat';
 import { useChat } from '@/hooks';
 
+const PROFILE_PLACEHOLDER = require('@/assets/images/profile-placeholder.png');
+
 export default function ChatScreen() {
   const { id } = useLocalSearchParams();
   const insets = useSafeAreaInsets();
@@ -32,6 +34,8 @@ export default function ChatScreen() {
   }
 
   const guestUser = messages.find((message) => message.user._id !== currentUserId);
+  const meMessage = messages.find((message) => message.user._id === currentUserId);
+  const meAvatar = meMessage?.user?.avatar;
 
   return (
     <View style={styles.container}>
@@ -47,7 +51,7 @@ export default function ChatScreen() {
         onSend={(messages: IMessage[]) => onSend(messages)}
         user={{
           _id: currentUserId,
-          avatar: require('@/assets/images/leonard_posa.jpeg'),
+          avatar: meAvatar ?? PROFILE_PLACEHOLDER,
         }}
         keyboardAvoidingViewProps={{ keyboardVerticalOffset: headerHeight }}
         renderBubble={renderBubble}

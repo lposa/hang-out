@@ -131,7 +131,7 @@ export const AcceptedRequests = ({
             <>
               <ParticipantDisplay
                 displayName={`${acceptedParticipants[0].user.first_name} ${acceptedParticipants[0].user.last_name}`}
-                avatarUrl={acceptedParticipants[0].user.avatar_url}
+                avatarUrl={acceptedParticipants[0].user.avatar}
               />
               <View style={styles.ratingSection}>
                 <Text style={styles.ratingLabel}>Rate your experience (1–5)</Text>
@@ -194,9 +194,9 @@ export const AcceptedRequests = ({
                 <View style={styles.avatarContainer}>
                   <Image
                     source={
-                      participant.user.avatar_url
-                        ? { uri: participant.user.avatar_url }
-                        : require('@/assets/images/leonard_posa.jpeg')
+                      participant.user.avatar
+                        ? { uri: participant.user.avatar }
+                        : require('@/assets/images/profile-placeholder.png')
                     }
                     style={styles.avatar}
                   />

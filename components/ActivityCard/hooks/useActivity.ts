@@ -7,6 +7,7 @@ import { supabase } from '@/services/Supabase';
 import { ACTIVITY_LIFECYCLE_STATUS_ENUM, TABLE_ENUM } from '@/constants';
 import { useToast } from '@/context/ToastContext';
 import { activityService } from '@/services';
+import { resolveSignedAvatarUri } from '@/helpers';
 
 export const useActivity = ({
   isCurrentUserActivity,
@@ -87,7 +88,7 @@ export const useActivity = ({
         id,
         guest_user_id,
         status,
-        user:profiles(id, first_name, last_name)
+        user:profiles(id, first_name, last_name, avatar)
         `
       )
       .eq('activity_id', activityId)
@@ -98,17 +99,49 @@ export const useActivity = ({
       showToast(`Failed to fetch requests: ${error.message}`, 'error');
       setPendingRequests(null);
     } else {
-      const filteredPending = (data as unknown as IPendingActivityParticipant[]).filter(
+      const typedData = data as unknown as IPendingActivityParticipant[];
+
+      const filteredPending = typedData.filter(
         (item) => item.status === PARTICIPANT_STATUS_ENUM.PENDING
       );
 
-      setPendingRequests(filteredPending);
+      const pendingWithAvatars = await Promise.all(
+        filteredPending.map(async (item) => {
+          const avatarPath = (item.user as unknown as { avatar?: string | null }).avatar ?? null;
+          const signedAvatarUrl = await resolveSignedAvatarUri(avatarPath);
 
-      const filteredAccepted = (data as unknown as IPendingActivityParticipant[]).filter(
+          return {
+            ...item,
+            user: {
+              ...item.user,
+              avatar_url: signedAvatarUrl ?? null,
+            },
+          };
+        })
+      );
+
+      setPendingRequests(pendingWithAvatars);
+
+      const filteredAccepted = typedData.filter(
         (item) => item.status === PARTICIPANT_STATUS_ENUM.ACCEPTED
       );
 
-      setAcceptedParticipants(filteredAccepted);
+      const acceptedWithAvatars = await Promise.all(
+        filteredAccepted.map(async (item) => {
+          const avatarPath = (item.user as unknown as { avatar?: string | null }).avatar ?? null;
+          const signedAvatarUrl = await resolveSignedAvatarUri(avatarPath);
+
+          return {
+            ...item,
+            user: {
+              ...item.user,
+              avatar_url: signedAvatarUrl ?? null,
+            },
+          };
+        })
+      );
+
+      setAcceptedParticipants(acceptedWithAvatars);
     }
   };
 
