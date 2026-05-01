@@ -1,6 +1,5 @@
 import { Text, View } from 'react-native';
 import { useEffect, useState } from 'react';
-import latestShowTimes from '../../../../scripts/scrapers/output/latest-showtimes.json';
 import { styles } from './CurrentMoviesInTheaters.styles';
 import { DatePillPicker } from '../DatePillPicker';
 import { movieDB, tavilyService } from '@/services';
@@ -72,12 +71,16 @@ export const CurrentMoviesInTheaters = ({ onSelectShowtime }: ICurrentMoviesInTh
     setIsSavingToDb(true);
     try {
       const tavilyShowtimes = await tavilyService.getLocalShowtimes();
-      const showtimeItems = tavilyShowtimes ?? latestShowTimes.items;
+
+      if (!tavilyShowtimes) {
+        console.error("Tavily error. Couldn't fetch showtimes. Please try again later.");
+        return;
+      }
 
       let syncedMoviesCount = 0;
       let syncedSchedulesCount = 0;
 
-      for (const item of showtimeItems) {
+      for (const item of tavilyShowtimes) {
         const { data: existingShowtime } = await supabase
           .from(TABLE_ENUM.CINEMA_SHOWTIMES)
           .select('id')
