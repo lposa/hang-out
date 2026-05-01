@@ -33,7 +33,7 @@ export const ProgressBar = ({
   const progressColor = getColorForPercentage(clampedMatch);
 
   if (variant === PROGRESS_BAR_VARIANT_ENUM.CIRCULAR) {
-    const size = 48;
+    const size = 60;
     const strokeWidth = 6;
     const radius = (size - strokeWidth) / 2;
     const circumference = 2 * Math.PI * radius;
@@ -64,6 +64,7 @@ export const ProgressBar = ({
           />
         </Svg>
         <View style={styles.circularCenterLabel}>
+          <Text style={styles.circularPercentText}>Match</Text>
           <Text style={styles.circularPercentText}>{Math.round(clampedMatch)}%</Text>
         </View>
       </View>

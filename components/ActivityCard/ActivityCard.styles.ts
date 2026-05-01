@@ -5,25 +5,32 @@ export const styles = StyleSheet.create({
     marginBottom: 30,
   },
 
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 16,
+  },
+
   profilePicContainer: {
-    position: 'absolute',
     zIndex: 2,
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    top: -50,
-    left: 20,
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    borderWidth: 2.5,
+    borderColor: '#82D0EE',
     shadowColor: '#82D0EE',
-    shadowOffset: { width: 5, height: 5 },
-    shadowOpacity: 0.5,
-    shadowRadius: 8,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.45,
+    shadowRadius: 10,
+    elevation: 6,
+    overflow: 'hidden',
   },
 
   profilePic: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: '100%',
+    height: '100%',
+    borderRadius: 40,
   },
   avatarPlaceholder: {
     alignItems: 'center',
@@ -47,6 +54,7 @@ export const styles = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: 8,
     elevation: 5,
+    paddingTop: 20,
   },
   statusBorderBase: {
     borderWidth: 1,
@@ -66,18 +74,16 @@ export const styles = StyleSheet.create({
   },
 
   statusPill: {
-    position: 'absolute',
-    top: 14,
-    right: 14,
     paddingVertical: 6,
     paddingHorizontal: 10,
     borderRadius: 999,
     zIndex: 10,
     borderWidth: 1,
+    width: 100,
+    alignSelf: 'flex-end',
+    alignItems: 'center',
   },
-  statusPillWithPosterOffset: {
-    top: 72,
-  },
+
   statusPill_pending: {
     backgroundColor: 'rgba(245, 158, 11, 0.12)',
     borderColor: 'rgba(245, 158, 11, 0.25)',
@@ -138,10 +144,10 @@ export const styles = StyleSheet.create({
   },
 
   contentSection: {
-    marginBottom: 16,
+    marginVertical: 16,
   },
   detailsContainer: {
-    marginTop: 12,
+    marginTop: 24,
     gap: 10, // Using gap for spacing
   },
   detailRow: {

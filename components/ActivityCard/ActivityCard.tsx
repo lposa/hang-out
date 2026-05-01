@@ -1,5 +1,4 @@
 import { ActivityPosterDetails } from '@/components/ActivityPosterDetails/ActivityPosterDetails';
-import { MovieDetails } from '@/components/MovieDetails/MovieDetails';
 import { GradientButton } from '@/components/elements';
 import { Activity } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
@@ -10,6 +9,7 @@ import { PARTICIPANT_STATUS_ENUM } from './types';
 import { useActivity } from '@/components/ActivityCard/hooks/useActivity';
 import { AcceptedRequests, PendingRequests } from '@/components/ActivityCard/components';
 import { ACTIVITY_LIFECYCLE_STATUS_ENUM } from '@/constants';
+import { ActivityDetailsMovie } from '@/components/ActivityCard/components/ActivityDetailsMovie/ActivityDetailsMovie';
 
 interface IActivityCardProps {
   activityData: Activity;
@@ -117,61 +117,41 @@ export const ActivityCard = ({
   };
 
   return (
-    <View
-      style={[
-        styles.activityContainer,
-        isCurrentUserActivity ? { marginTop: 20 } : { marginTop: 100 },
-      ]}
-    >
-      {!isCurrentUserActivity && (
-        <>
-          <Pressable
-            style={styles.profilePicContainer}
-            onPress={() => handleOpenProfile(hostUserId)}
-          >
-            <AvatarWithInitials
-              avatarUrl={avatar}
-              firstName={first_name}
-              lastName={last_name}
-              size={100}
-            />
-          </Pressable>
-
-          <ActivityPosterDetails
-            name={`${first_name} ${last_name}`}
-            reviewScore={5}
-            userId={hostUserId}
-          />
-        </>
-      )}
-
+    <View style={styles.activityContainer}>
       <View
         style={[
           styles.activityInformationContainer,
-          isCurrentUserActivity ? { paddingTop: 20 } : { paddingTop: 60 },
           styles.statusBorderBase,
           styles[`statusBorder_${statusPill.variant}`],
           isCompleted && styles.activityCompleted,
         ]}
       >
-        <View
-          style={[
-            styles.statusPill,
-            !isCurrentUserActivity && styles.statusPillWithPosterOffset,
-            styles[`statusPill_${statusPill.variant}`],
-          ]}
-        >
+        <View style={[styles.statusPill, styles[`statusPill_${statusPill.variant}`]]}>
           <Text style={styles.statusPillText}>{statusPill.label}</Text>
         </View>
+        {!isCurrentUserActivity && (
+          <View style={styles.header}>
+            <Pressable
+              style={styles.profilePicContainer}
+              onPress={() => handleOpenProfile(hostUserId)}
+            >
+              <AvatarWithInitials
+                avatarUrl={avatar}
+                firstName={first_name}
+                lastName={last_name}
+                size={90}
+              />
+            </Pressable>
 
-        <View style={styles.activityHeader}>
-          <Text style={styles.activityTitle} numberOfLines={2} ellipsizeMode="tail">
-            {activityDetails?.title}
-          </Text>
-        </View>
-
+            <ActivityPosterDetails
+              name={`${first_name} ${last_name}`}
+              reviewScore={5}
+              userId={hostUserId}
+            />
+          </View>
+        )}
         <View style={styles.contentSection}>
-          <MovieDetails movie={activityDetails} />
+          <ActivityDetailsMovie movie={activityDetails} />
           <View style={styles.detailsContainer}>
             <View style={styles.detailRow}>
               <Ionicons name="calendar-outline" size={18} color="#666" />

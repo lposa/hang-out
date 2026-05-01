@@ -1,15 +1,10 @@
-import { Pressable, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { styles } from './ActivityPosterDetails.styles';
-import { ProgressBar } from '@/components/ProgressBar/ProgressBar';
-import { useCalculateUserMatch, useProfile } from '@/hooks';
-import { useState, useEffect } from 'react';
-import { analyzeMatch } from '@/ai';
-import { supabase } from '@/services/Supabase';
-import { TABLE_ENUM } from '@/constants';
+import { useCalculateUserMatch } from '@/hooks';
 import { Ionicons } from '@expo/vector-icons';
-import { LoaderSpinner } from '@/components/elements/LoaderSpinner';
-import { ProfileTopTenMoviesRow } from '@/hooks/useProfile';
 import { UserMatchBar } from '@/components/UserMatchBar';
+import { PROGRESS_BAR_VARIANT_ENUM } from '@/components/ProgressBar/ProgressBar';
+import { router, Href } from 'expo-router';
 
 interface IActivityPosterProps {
   name: string;
@@ -17,21 +12,6 @@ interface IActivityPosterProps {
   userId: string;
   category?: 'movies' | 'books' | 'tv_shows';
 }
-
-const renderStars = (reviewScore: number) => {
-  const filledStars = Math.floor(reviewScore);
-  const hasHalfStar = reviewScore % 1 >= 0.5;
-
-  return [...Array(5)].map((_, index) => {
-    if (index < filledStars) {
-      return <Ionicons key={index} name="star" size={18} color="#f5a623" />;
-    }
-    if (index === filledStars && hasHalfStar) {
-      return <Ionicons key={index} name="star-half" size={18} color="#f5a623" />;
-    }
-    return <Ionicons key={index} name="star-outline" size={18} color="#999" />;
-  });
-};
 
 export const ActivityPosterDetails = ({
   name,
@@ -44,6 +24,10 @@ export const ActivityPosterDetails = ({
     category,
   });
 
+  const handleScorePress = () => {
+    router.push(`/(profile)/profile-screen/${userId}?tab=AI+Analysis` as Href);
+  };
+
   return (
     <View style={styles.activityPosterDetailsContainer}>
       <View style={styles.posterInfo}>
@@ -51,7 +35,7 @@ export const ActivityPosterDetails = ({
           {name}
         </Text>
         <View style={styles.ratingContainer}>
-          <View style={styles.starsContainer}>{renderStars(reviewScore)}</View>
+          <Ionicons name="star" size={18} color="#f5a623" />
           <Text style={styles.reviewScoreText}>{reviewScore.toFixed(1)}</Text>
         </View>
       </View>
@@ -60,7 +44,8 @@ export const ActivityPosterDetails = ({
         matchScore={matchScore}
         calculateUserMatch={calculateUserMatch}
         loading={loading}
-        externalStyles={{ backgroundColor: '#E5F0FF' }}
+        progressBarVariant={PROGRESS_BAR_VARIANT_ENUM.CIRCULAR}
+        onScorePress={handleScorePress}
       />
     </View>
   );

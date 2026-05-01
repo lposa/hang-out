@@ -10,6 +10,7 @@ interface IUserMatchBarProps {
   loading: boolean;
   externalStyles?: StyleProp<ViewStyle>;
   progressBarVariant?: PROGRESS_BAR_VARIANT_ENUM;
+  onScorePress?: () => void;
 }
 
 export const UserMatchBar = ({
@@ -18,14 +19,15 @@ export const UserMatchBar = ({
   loading,
   externalStyles,
   progressBarVariant = PROGRESS_BAR_VARIANT_ENUM.LINEAR,
+  onScorePress,
 }: IUserMatchBarProps) => {
   if (loading) {
-    return null;
+    return <LoaderSpinner size={18} color="#6366F1" />;
   }
 
   if (progressBarVariant === PROGRESS_BAR_VARIANT_ENUM.CIRCULAR) {
     return (
-      <View style={[styles.matchContainer, externalStyles]}>
+      <View style={[styles.matchContainerCircular, externalStyles]}>
         {matchScore === undefined ? (
           <Pressable
             style={[styles.circularPlaceholderButton, loading && styles.calculateButtonDisabled]}
@@ -44,7 +46,7 @@ export const UserMatchBar = ({
         ) : (
           <Pressable
             style={[styles.circularInteractiveArea, loading && styles.calculateButtonDisabled]}
-            onPress={calculateUserMatch}
+            onPress={onScorePress}
             disabled={loading}
           >
             <ProgressBar match={matchScore} variant={PROGRESS_BAR_VARIANT_ENUM.CIRCULAR} />

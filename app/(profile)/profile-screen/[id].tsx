@@ -45,12 +45,14 @@ const styles = StyleSheet.create({
 
 export default function ProfileScreen() {
   const headerHeight = useHeaderHeight();
-  const { id } = useLocalSearchParams();
+  const { id, tab } = useLocalSearchParams();
   const { getUserDataById } = useProfile();
 
   const [userProfile, setUserProfile] = useState<Profile>();
   const [userMatch, setUserMatch] = useState<IUserMatch | null>(null);
-  const [activeTab, setActiveTab] = useState<TAB_ENUM>(TAB_ENUM.PROFILE);
+  const [activeTab, setActiveTab] = useState<TAB_ENUM>(
+    tab === TAB_ENUM.AI_ANALYSIS ? TAB_ENUM.AI_ANALYSIS : TAB_ENUM.PROFILE
+  );
 
   useEffect(() => {
     const getProfileData = async () => {

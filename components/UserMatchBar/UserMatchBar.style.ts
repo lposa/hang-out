@@ -13,6 +13,9 @@ export const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 12,
   },
+  matchContainerCircular: {
+    alignItems: 'center',
+  },
   calculateButton: {
     backgroundColor: '#8B5CF6',
     borderRadius: 8,
@@ -41,6 +44,7 @@ export const styles = StyleSheet.create({
   },
   circularPlaceholderButton: {
     minWidth: 76,
+    width: 100,
     height: 44,
     borderRadius: 22,
     borderWidth: 1.5,
